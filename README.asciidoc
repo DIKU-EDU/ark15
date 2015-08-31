@@ -1,0 +1,13 @@
+= Welcome to Machine Architecture 2015 at DIKU
+
+This is a companion git-repository for the course materials. If you have any
+comments or corrections to the material, feel free to open issues and make pull
+requests.
+
+== Tutorials
+
+* link:tutorials/linux-toolchains-and-assembly.html[Linux, Toolchains, and Assembly]
+
+== Assignments
+
+(Coming soon.)
