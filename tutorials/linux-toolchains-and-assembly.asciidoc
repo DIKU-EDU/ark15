@@ -1,0 +1,1545 @@
+= Tutorial: Linux, Toolchains, and Assembly
+ARK15 Course Team <ark15@dikumail.dk>; see also Major Contributors
+v1.0, August 31, 2015
+:doctype: article
+:backend: html5
+:docinfo:
+:sectanchors:
+:sectnums:
+:toc:
+
+In the course http://www.webcitation.org/6a2I3GpLv[Machine Architecture (ARK)]
+at http://www.diku.dk[DIKU], you will work through three G-assignments ("G" for
+"Godkendelse" and/or "Gruppeopgave") which you must pass in order to be
+eligible for the exam. We encourage
+https://en.wikipedia.org/wiki/Pair_programming[pair programming] the
+G-assignments, so this might be a good time to form groups of 2-3 students.
+
+[.lead]
+This exercise sets you up with the necessary tools and offers some practice
+writing assembly and C, as well as compiling, assembling, and linking your
+code. This exercise is *not mandatory*, but you are *strongly encouraged* to
+complete it as you will need these skills to complete the first assignment.
+
+[.lead]
+If you have any comments or corrections to the text, visit our public GitHub
+repository at https://github.com/onlineta/ark15
+
+[.lead]
+Happy hacking :-)
+
+== Introduction
+
+An executable file is a series of instructions, called machine code, packed
+into a format that your operating system (Linux, OS X, Windows, etc.)
+understands.  Machine code itself is __architecture dependent__: its precise
+format depends on the __instruction set architecture__ for which it is
+intended.  Your own machine is probably an
+https://en.wikipedia.org/wiki/X86-64[x86-64] architecture, whereas in this
+course, we will study a variant of the
+https://en.wikipedia.org/wiki/MIPS_Instruction_Set[MIPS instruction set]: MIPS
+processors strive in network routers and video game consoles.
+
+Machine code is a series of bits which are understood by a CPU. Dealing with
+bits is not very programmer friendly. An XKCD comic puts text editors and bits
+into perspective:
+
+.XKCD: Real Programmers (source: http://xkcd.com/378/).
+image::http://imgs.xkcd.com/comics/real_programmers.png[align="center"]
+
+Assembly language instructions are textual mnemonics (representations) for
+sequences of bits.  Writing assembly is the closest to the hardware a
+programmer usually gets. Like machine code, assembly code is architecture
+dependent.
+
+Assembly language is translated into machine code by an __assembler__.  Higher
+level languages, such as C, are usually architecture __independent__, and code
+is converted into machine code (sometimes, assembly code) by a __compiler__.
+
+The machine code is read into main memory upon execution. Small, fast CPU
+registers contain fixed-size bit-sequences, and are used for executing
+individual instructions: machine instructions operate on registers. In MIPS32,
+registers are 32 bits wide. We say that instructions operate on 32-bit
+__words__.
+
+Computation on values in memory means that values must be explicitly read from
+memory into registers, and explicitly written from registers to memory. This
+wastes precious clock cycles. Working with memory is significantly slower than
+working exclusively with registers.
+
+In MIPS32, there are 32 __general-purpose__ registers. There are also a couple
+__special-purpose__ registers. The Program Counter (PC) register, contains the
+memory address of the instruction to be executed next.  Instructions in MIPS32
+are always one word, or 32 bits wide. Memory on the other hand, is addressed
+in bytes, that is, in terms of 8-bit sequences. After each instruction is
+executed, the PC must therefore be incremented by 4 to point to the immediately
+following instruction.
+
+The exact format of an instruction depends upon the type of operation being
+carried out, but the most significant 6 bits always denote the "opcode", which
+designates the type of instruction to be executed. The rest of the bits making
+up the instruction contain register numbers, partial memory addresses, or
+additional parameters for the instruction.
+
+=== Assembly and Linking
+
+////
+Symbols corresponding to labels can be defined within assembly code. These
+provide references to the memory addresses of places in the code. These
+references are used by branch and jump instructions, which correspond to
+conditionals such as if, and goto respectively.
+////
+
+An assembler assembles assembly code into an __object file__. An object file is
+not directly executable, but it begins with a header, providing information
+about the remaining contents of the file. The contents may include:
+
+* A text section containing the machine code.
+
+* A (static) data section containing the data that must persist throughout the
+lifetime of a program.
+
+* Relocation information, allowing the text and data segments to be moved
+around in memory.
+
+* A symbol table, matching externally visible labels to machine code addresses.
+
+The format of an object file (the way the file is structured) varies across
+operating systems. For Linux, this is typically the
+https://en.wikipedia.org/wiki/Executable_and_Linkable_Format[Executable and
+Linkable Format], or ELF.
+
+One or more object files can be linked together by a __linker__. A linker
+resolves internal references within an object file, and externally, to other
+files. A linker produces a file that your operating system knows how to
+execute. As you might have guessed, for Linux, this is typically also the
+https://en.wikipedia.org/wiki/Executable_and_Linkable_Format[Executable and
+Linkable Format], or ELF.
+
+////
+Linking may include relocating code in memory, which requires
+information about which instructions depend upon absolute addresses.
+////
+
+Similar to an object file, an executable file begins with a header, and may
+contain, among other things, a text and data segment. The header provides
+information on how to set up the memory before executing the program: how to
+place the text and data segments for all branches, jumps, and loads to work
+correctly.  The header also lists the address of the __entry point__
+instruction. This is the instruction which will be executed first.
+
+If all this seems mysterious to you, take a look at the Appendices A.1 to A.5
+in <<COD>>, also available from http://pages.cs.wisc.edu/~larus/HP_AppA.pdf[the
+author's website].
+
+=== Compiling
+
+A compiler for a high-level language, e.g. C, produces either an assembly-,
+object- or executable file.
+
+
+== A Unix-like Programming Environment
+
+The purpose of this section is to introduce you to a particular philosophy of
+using a computer.
+
+This philosophy is likely to be different from what you are accustomed to; and
+yet, it stands on the shoulders of the humble pioneers of many modern operating
+systems and programming environments.
+
+The reason that this way of using a computer is not in wide-spread adoption is
+perhaps due to:
+
+. a general public disinterest in computer programming,
+. the general public's fondness of
+http://en.wikipedia.org/wiki/Graphical_user_interface[graphical user
+interfaces], and
+. the resulting sectarianism of those who practice what we preach.
+
+
+=== The Bits of History
+
+UNIX® is trademark of http://www.unix.org/what_is_unix.html[The Open Group],
+who stand to certify products which conform to the
+http://www.unix.org/online.html[Single UNIX Specification]. Colloquially
+however, "Unix" refers to a family of operating systems developed at Bell Labs
+in the 1970s, and their countless descendants.
+
+A https://www.youtube.com/watch?v=XvDZLjaCJuw[1982 Bell Labs video], recently
+made available under the AT&T Archives, starring such pioneers as Ken Thompson,
+Dennis Ritchie, and Brian W. Kernighan, gives further insight into what the
+original UNIX systems were like, and the philosophy and history behind them.
+
+An important aspect of the history of UNIX is that it has always been guided by
+the needs of its users and programmers. This goal, quite incidentally, results
+in a philosophy:
+
+[quote, Brian W. Kernigan and Rob Pike, "The UNIX Programming Environment, Prentice Hall, 1984"]
+____
+Even though the UNIX system introduces a number of innovative programs and
+techniques, no single program or idea makes it work well. Instead, what makes
+it effective is an approach to programming, a philosophy of using the computer.
+Although that philosophy can't be written down in a single sentence, at its
+heart is the idea that the power of a system comes more from the relationships
+among programs than from the programs themselves. Many UNIX programs do quite
+trivial tasks in isolation, but, combined with other programs, become general
+and useful tools.
+____
+
+A Unix-like programming environment is ultimately about *freedom*: the freedom
+to choose how to structure your programming environment. It is how you choose
+to combine the programs we discuss below that determines the structure,
+benefits, and efficiency of your programming environment.
+
+For pedagogical reasons, we won't endorse this freedom to it's utopian extent:
+you will work on predefined programming projects, with predeclared programming
+conventions. This tutorial exists to emphasize that other programming
+environments might very well be much more suitable to your intents. Of
+course, we do retain _some_ degrees of freedom, such as the choice of text
+editor.
+
+
+=== Hello, Terminal
+
+The crux of a Unix-like programming environment is a command-line that
+interfaces with the operating system, often referred to as a "shell" or
+"terminal".
+
+A https://en.wikipedia.org/wiki/Command-line_interface[command-line interface
+(CLI)] interprets textual commands, rather than e.g.  mouse clicks or gestures.
+A CLI presents the user with a line where they can enter text, and prompts the
+user to enter a command. The user can then type away at the keyboard, and
+finally hit the Enter key to enter the command. The CLI will then respond by
+executing the command, which may or may not have some directly observable
+effect, and at some point eventually present the user with another prompt.
+
+For instance, recall the Moscow ML CLI from the time you had Introduction to
+Programming:
+
+----
+Moscow ML version ...
+Enter `quit();' to quit.
+- 5+5;
+> val it = 10 : int
+- 
+----
+
+Here, the user is prompted to enter a command by a dash (`-`), followed by a
+space:  When you see a line starting with a prompt, you know Moscow ML is
+waiting for you to enter a command.
+
+Another CLI you might already be familiar with is the Python CLI:
+
+----
+Python ...
+Type "help", "copyright", "credits" or "license" for more information.
+>>> 5+5
+10
+>>>
+----
+
+Here, the prompt is 3 chevrons (`>>>`), followed by a space.
+
+The prompt of a Unix-like "terminal" or "shell" is typically a dollar sign
+(very American!), followed by a space. As with Moscow ML and Python, the
+commands you type into a shell are written in a particular "shell programming
+language". The primary purpose of this language is to execute the programs
+stored on your computer. For instance, the program `echo` simply prints its
+argument back to the user:
+
+----
+$ echo 10
+10
+$ 
+----
+
+Many systems will prepend the dollar sign with some contextual information,
+such as the current working directory, the name of the machine (hostname), and
+the name of the user. For instance,
+
+----
+student@laptop:~/ark/$ echo 10
+10
+student@laptop:~/ark/$ 
+----
+
+*Note:* On Unix-like systems, `~` is shorthand for the home directory  of the
+current user.
+
+We say that this prompt has the following format:
+
+----
+<user>@<hostname>:<cwd>$
+----
+
+Where `<cwd>` is the "current working directory". A shell, like any other
+program, is always working from the point of view of a particular directory in
+your file system.  The current working directory is important when dealing with
+commands that interact with the file system.
+
+Some other things you might do in a shell is launch a Moscow ML CLI:
+
+----
+$ mosml
+Moscow ML version ...
+Enter `quit();' to quit.
+- 5+5;
+> val it = 10 : int
+- quit();
+$ 
+----
+
+Or launch a Python CLI:
+
+----
+$ python
+Python ...
+Type "help", "copyright", "credits" or "license" for more information.
+>>> 5+5
+10
+>>> quit()
+$
+----
+
+Now let's get you started with a shell on your own system.
+
+
+=== Hello, Linux
+
+Although the general concepts that we cover in this course hold across, and in
+spite of, wide-spread operating systems (Linux, OS X, Windows, etc.), we will
+focus on how these concepts play out in
+https://en.wikipedia.org/wiki/Linux[Linux].
+
+The reason we choose Linux is that the insides of a Linux-based operating
+system are often both https://en.wikipedia.org/wiki/Open_source[open-source]
+and publicly well-documented. This is not something we can say about either OS
+X or Windows at the time of writing. Linux is subject to public scrutiny, and
+you too can point out the mistakes.  Last, but not least, most Linux's are
+free (but take your time).
+
+If you are not already running Linux, we humbly encourage you to try to install
+a native Linux partition in your spare time. If you are new to Linux, we can
+recommend either http://antergos.com/[Antergos] or
+http://www.ubuntu.com/[Ubuntu]. If you don't want to play with your computer,
+you can install https://www.virtualbox.org/[VirtualBox] and run the Linux
+virtual machine that we have set up for this course. This is the easiest
+option, as our VirtualBox image already comes with all the tools you need.
+
+=== VirtualBox Image
+
+https://www.virtualbox.org/[Oracle VM VirtualBox] is a free software that can
+create, run, and monitor virtual machines (VMs). This sort of software is
+typically called a https://en.wikipedia.org/wiki/Hypervisor[hypervisor]. Go
+ahead and https://www.virtualbox.org/wiki/Downloads#VirtualBoxbinaries[install
+VirtualBox on your host operating system].
+
+[IMPORTANT]
+.Enable Hardware Virtualization
+====
+
+On most systems, "hardware virtualization" must first be enabled in the
+BIOS/UEFI configurations before VirtualBox can run effectively. Restart your
+computer, enter the BIOS/UEFI. Enable the "hardware virtualization" feature for
+your CPU. (This features is called VT-x on Intel, and AMD-V on AMD systems.)
+
+====
+
+We have prepared https://en.wikipedia.org/wiki/Open_Virtualization_Format[Open
+Virtual Appliance (OVA)] which you can _import_ in your VirtualBox.
+
+Use one of the following mirrors to download the appliance:
+
+* http://static.ark15.onlineta.org/CompSysVM-v1.0.ova
+* http://napoleon.hiperfit.dk/~oleks/CompSysVM-v1.0.ova
+* http://harlem.dikurevy.dk/~oleks/CompSysVM-v1.0.ova
+
+[TIP]
+.Checksums
+====
+
+A checksum is an almost unique alphanumeric code generated based on the
+contents of a file. A checksum is often used to check the integrity of a file.
+
+It is important to check the checksum the files you download over an insecure
+network (such as http), and from otherwise untrusted services. This way you can
+make sure that what you've downloaded is what we intended for you to download.
+
+The SHA256 checksum of our `CompSysVM-v1.0.ova` is:
+
+----
+c7f9d23fc727122cb73e0f7da78be958ee21132f330f5ed65a12f4da11ee644b
+----
+
+====
+
+Once you have a good-looking `CompSysVM-v1.0.ova`, and have VirtualBox
+installed:
+
+. Open up VirtualBox and choose File → Import Appliance.
+. Choose a virtual appliance to import: your `CompSysVM-v1.0.ova`.
+. Press "Next".
+. Make any last modifications: You might want to check how much memory you
+allocate to the VM.
+. Press "Import".
+. Read the license and if you agree, press "Agree".
+
+You now have a virtual image "CompSysVM" in your left-hand sidebar. Select it
+and press "Start".
+
+[TIP]
+.Trouble starting the virtual machine? The virtual machine is sloooow?
+====
+
+If you are getting a warning like:
+
+____
+VT-x/AMD-V hardware acceleration is not available on your system.
+____
+
+You need to enable "hardware virtualization" in your BIOS/UEFI configurations.
+Restart your computer, enter the BIOS/UEFI. Enable the "hardware
+virtualization" feature for your CPU. (This features is called VT-x on Intel,
+and AMD-V on AMD systems.)
+
+====
+
+
+Welcome to Debian GNU/Linux:
+
+* Your hostname is "syracuse".
+* Your username is "archimedes".
+* Your (and the root) password is "hamster".
+
+The best place to start is to double-click the "Terminal - LXTerminal" icon.
+
+The prompt you'll be greeted with is canonical:
+
+----
+archimedes@syracuse:~$
+----
+
+Throughout the remainder of this course, we won't mention any archimedes at
+syracuse, and just state the working directory, when necessary.
+
+Happy hacking :-)
+
+=== Working with Directories
+
+Create a directory, `ark`, in our home (`~`) directory.
+
+----
+~$ mkdir ark
+----
+
+To change the current working directory, use the `cd` command:
+
+----
+~$ cd ark
+~/ark$ 
+----
+
+To go one level up in the directory structure, use `..` as the destination
+argument.
+
+----
+~/ark$ cd ..
+~$ 
+----
+
+We can use `ls` to list the contents of a directory:
+
+----
+~$ ls
+Desktop   opt   ark
+~$
+----
+
+== The Toolchains
+
+Throughout this course, you will work on building a limited MIPS32 simulator,
+written in C. This simulator is compiled to run on your own machine, which is
+in all likelihood an x86-64 architecture. To compile your simulator, you will
+need a C compiler which builds executables in your native format.
+
+The simulator itself will read and execute MIPS32 machine code. The machine
+code will be generated from MIPS32 assembly code which you will write. To
+produce MIPS32 machine code on your machine, you will need a compiler,
+assembler, and linker which "cross-compile" to the MIPS ELF executable format.
+
+The rest of this exercise will walk you through using the following tools.
+These tools are already installed on the handed out VirtualBox image mentioned
+above.  If you want to avoid having to run VirtualBox, have a look at
+<<_optional_roll_your_own_toolchains>> at the end of this document. You
+__might__ need a Linux box.
+
+.GNU Compiler Collection
+|===
+| *Program* | *Our Purpose* | *Native* | *Cross-architecture*
+| GNU Compiler Collection | Compile .c files | `gcc` | `mips-elf-gcc`
+|===
+
+.GNU Binutils
+|===
+| *Program* | *Our Purpose* | *Native* | *Cross-architecture*
+| GNU Assembler | Assemble .S files | `as` | `mips-elf-as`
+| GNU Linker | Link .o files | `ld` | `mips-elf-ld`
+| GNU objdump | Disassemble ELF files | `objdump` | `mips-elf-objdump`
+| GNU objcopy | Dump machine code | `objcopy` | `mips-elf-objcopy`
+| readelf     | Inspect ELF files | `readelf` | `readelf`
+| xxd         | Inspect machine code | `xxd` | `xxd`
+|===
+
+== Writing Assembly
+
+Make a directory for your assignments in this course. Add a subdirectory for
+assembly code. Enter this subdirectory:
+
+----
+~$ mkdir ark
+~$ mkdir ark/asm
+~$ cd ark/asm
+ark/asm$ 
+----
+
+=== My First Assembly/Disassembly
+
+Use a text editor to create a new file called `play.S` in `~/ark/asm`,
+containing the single line:
+
+.Original `~/ark/asm/play.S`
+----
+add $2, $8, $9
+----
+
+The `.S` (capital S) file extension is conventional to use for assembly files.
+
+You now have a file containing a single line of assembly, which adds the
+contents of the registers `$8` and `$9`, and places the result in `$2`.
+Alternatively, we could've used register names instead of their numbers:
+
+.Alternative `~/ark/asm/play.S`
+----
+add $v0, $t0, $t1
+----
+
+Registers in assembly can either be referenced by their symbolic names, or
+their number. Different registers are generally used for different things. A
+full listing of the symbolic names and corresponding use cases can be found on
+the "green card", or Chapter 2 in <<COD>>.
+
+Assembly code must be assembled and linked before it can be run. As we are
+working with MIPS32 assembly, we must use the cross-architecture toolchain set
+up above. In particular, we will use the cross-architecture GNU Assembler,
+`mips-elf-as` to assemble `play.S`:
+
+----
+~/ark/asm$ mips-elf-as -mips32 -o play.o play.S
+----
+
+[TIP]
+.Arguments to the GNU Assembler
+====
+
+. `-mips32` tells the assembler to assemble for a MIPS32 system. There are many
+variants of the https://en.wikipedia.org/wiki/MIPS_instruction_set[MIPS
+instruction set] out there, including e.g. MIPS64. We will only look at MIPS32.
+
+. `-o play.o` tells the assembler to name the resulting object file `play.o`.
+If you omit this argument, the object file will be called `a.out`.
+https://en.wikipedia.org/wiki/A.out[`a.out` stands for "assembler output"], and
+was originally an executable and object file format. This name is a relic of
+the 1970s. As you will shortly see, the file is really an ELF object file. We
+discussed ELF object files in the <<_introduction>>.
+
+====
+
+Your `~/ark/asm` directory should now look like this:
+
+----
+~/ark/asm$ ls
+play.S  play.o
+----
+
+You can use the `file` utility to examine what `play.o` is:
+
+----
+~/ark/asm$ file play.o 
+play.o: ELF 32-bit MSB relocatable, MIPS, MIPS32 version 1 (SYSV), not stripped
+----
+
+`file` tells us that this is a 32-bit ELF file, intended for a MIPS32
+architecture. It also tells us that `play.o` is "relocatable". This is an
+obscure way of saying that it's an object file (and not e.g. an executable
+file). "MSB" signifies that the data is stored in 2's complement, big-endian
+format. This technical detail might be important in some G-assignments.
+
+Similar information can be obtained from the `readelf` GNU binutility. We
+include an example for completeness, but you don't need to understand all the
+fields:
+
+----
+~/ark/asm$ readelf --file-header play.o
+ELF Header:
+  Magic:   7f 45 4c 46 01 02 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF32
+  Data:                              2's complement, big endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              REL (Relocatable file)
+  Machine:                           MIPS R3000
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          0 (bytes into file)
+  Start of section headers:          404 (bytes into file)
+  Flags:                             0x50000000, mips32
+  Size of this header:               52 (bytes)
+  Size of program headers:           0 (bytes)
+  Number of program headers:         0
+  Size of section headers:           40 (bytes)
+  Number of section headers:         11
+  Section header string table index: 8
+----
+
+The object file `play.o` contains the machine code in binary form in a
+so-called `.text` section. The object file contains other sections as well. We
+can use the `readelf` utility to see what sections a file has. Again, we
+include an example for completeness, but you don't need to understand all the
+fields:
+
+----
+~/ark/asm$ readelf --sections play.o
+There are 11 section headers, starting at offset 0x194:
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .text             PROGBITS        00000000 000034 000004 00  AX  0   0  4
+  [ 2] .data             PROGBITS        00000000 000038 000000 00  WA  0   0  1
+  [ 3] .bss              NOBITS          00000000 000038 000000 00  WA  0   0  1
+  [ 4] .reginfo          MIPS_REGINFO    00000000 000038 000018 01      0   0  4
+  [ 5] .MIPS.abiflags    MIPS_ABIFLAGS   00000000 000050 000018 18   A  0   0  8
+  [ 6] .pdr              PROGBITS        00000000 000068 000000 00      0   0  4
+  [ 7] .gnu.attributes   LOOS+ffffff5    00000000 000068 000010 00      0   0  1
+  [ 8] .shstrtab         STRTAB          00000000 000078 000059 00      0   0  1
+  [ 9] .symtab           SYMTAB          00000000 0000d4 000080 10     10   8  4
+  [10] .strtab           STRTAB          00000000 000154 00003f 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings)
+  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)
+  O (extra OS processing required) o (OS specific), p (processor specific)
+----
+
+GNU objcopy is a GNU binutil for inspecting the contents of an object file. We
+can use the cross-architecture `mips-elf-objcopy` to extract the `.text`
+section into a binary file:
+
+----
+~/ark/asm$ mips-elf-objcopy -j .text -O binary play.o play.text
+~/ark/asm$ ls
+play.S  play.o  play.text
+~/ark/asm$ file play.text
+play.text: data
+----
+
+[TIP]
+.Arguments to GNU objcopy
+====
+
+. `-j .text` tells `objcopy` to extract just the text section. If you omit this
+argument, it will extract all the sections in order.
+
+. `-O binary` tells `objcopy` to output the section in binary format.  If you
+omit this argument, `objcopy` will output an object file with _just_ the
+specified section.
+
+====
+
+We can use the `xxd` utility to inspect the machine code generated by the
+assembler:
+
+----
+~/ark/asm$ xxd -bits -cols 4 -g 0 play.text
+00000000: 00000001000010010001000000100000  ...
+----
+
+The value left of the colon in the output of `xxd`, is the offset of the
+byte-sequence that follows.
+
+[TIP]
+.Arguments to xxd
+====
+
+. `-bits` tells `xxd` to dump the bits of every byte. If you omit this
+argument, the output will be in hexadecimal.
+
+. `-cols 4` tells `xxd` to dump 4 bytes per line. This makes it easy to read
+off the instructions.
+
+. `-g 0` tells `xxd` to _not_ split the bytes by spaces, resulting in `xxd`
+printing 32 bits in a row.
+
+====
+
+MIPS has different types of instructions. `add` is an R-type instruction. The
+processor uses the opcode (the first six bits of the instruction) to determine
+the type of the instruction. Let's try to decode the bits of `add` above.  We
+split into the various fields of the instruction: The first six bits are
+opcode, the next five are rs, then five bits rt, then five bits rd, then five
+bits shamt, and then six bits funct:
+
+----
+00000000: 000000 01000 01001 00010 00000 100000
+          op     rs    rt    rd    shamt funct
+----
+
+====
+
+**EXERCISE**
+
+Modify `play.S` in `~/ark/asm/`. Try writing the following instructions one at
+a time (instead of `add $v0, $t0, $t1`). Assemble, copy the `.text` section,
+dump the bits, and decode the bits as we did above. Use the up-arrow (↑) on
+your keyboard to bring back a command you recently executed in your terminal.
+Use
+http://booksite.elsevier.com/9780124077263/downloads/COD_5e_Greencard.pdf[the
+"green card"] in <<COD>> if in doubt about how to decode the instruction.
+
+. `sub $v0, $t3, $t4`
+. `addiu $v0, $v0, 5`
+
+====
+
+=== Converting Binary to Decimal
+
+////
+MIPS32 is a big-endian architecture, as opposed to the x86-64 architecture,
+which is little-endian. A big-endian architecture means that the most
+significant byte of a number is stored at the lowest memory address, or left to
+right from most to least significance in the above.
+////
+
+We can convert the bits making up each field of the instruction from binary to
+decimal. In __positional notation__, a number is a string of digits. The
+digits, numbered from right to left, starting at 0, signify the multiple of the
+power of the base that goes into the number. In binary, the base is 2. In
+decimal, the base is 10.
+
+For instance, in base 10, the expression "42" has the value 42:
+
+----
+4*10^1 + 2*10^0 = 42
+----
+
+In base 2, the expression "101010" also has the value 42:
+
+----
+1*2^5 + 0*2^4 + 1*2^3 + 0*2^2 + 1*2^1 + 0*2^0 = 32 + 8 + 2 = 42
+----
+
+Thus, the bits of the `op` field in the instruction from the previous section
+
+----
+00000000: 000000 01000 01001 00010 00000 100000
+          op     rs    rt    rd    shamt funct
+----
+
+is equal to "0" in base 10:
+
+----
+0*2^5 + 0*2^4 + 0*2^3 + 0*2^2 + 0*2^1 + 0*2^0 = 0 
+----
+
+All R-type instructions have opcode 0.
+
+The first source register, `rs`, is "01000" in binary, or "8" in decimal:
+
+----
+0*2^4 + 1*2^3 + 0*2^2 + 0*2^1 + 0*2^0 = 8
+----
+
+Looking at the "green card", we can see how register number 8 corresponds to
+register t0.
+
+====
+
+**EXERCISE**
+
+Verify that the second source register field (`rt`) and the destination
+register field (`rd`) from the instruction above correspond as expected to
+registers t1 and v0, respectively.
+
+====
+
+=== My First Shell Script
+
+One true power of a Unix-like programming environment comes from the ability to
+group repetitive sequences of tasks into one task. There are multiple ways to
+do this in a Unix-like programming environment. One of them is to write a
+so-called "shell script".
+
+Write a file `~/ark/asm/build.sh` with the following contents:
+
+.`~/ark/asm/build.sh`
+----
+mips-elf-as -mips32 -o $1.o $1.S || exit
+mips-elf-objcopy -j .text -O binary $1.o $1.text || exit
+xxd -bits -cols 4 -g 0 $1.text || exit
+----
+
+`$1` refers to the first command-line argument of the shell script. `|| exit`
+(read "or exit") at the end of every line makes sure to halt the shell script,
+should the command fail.
+
+Now, in your terminal mark `build.sh` as executable using `chmod`:
+
+----
+~/ark/asm$ chmod +x build.sh
+----
+
+And voilá:
+
+----
+~/ark/asm$ ./build.sh play
+00000000: 00000001000010010010000000100000  .. 
+----
+
+[TIP]
+.Why `./build.sh`, and not just `build.sh`?
+====
+
+Normally, when you type a command in your shell and press enter, your shell
+searches the directories in your `$PATH`
+https://en.wikipedia.org/wiki/Environment_variable[environment variable] for an
+executable file matching the name of the command. To see the content of `$PATH`
+on your system, type
+
+----
+$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+$
+----
+
+To see which file actually gets executed when you run a given command, use
+`which`:
+
+----
+$ which gcc
+/usr/bin/gcc
+$ 
+----
+
+Since our `build.sh` script is not located in a directory referenced by
+`$PATH`, we use the `./` prefix to tell the shell to look for a locally
+referenced executable.
+
+====
+
+
+====
+
+**EXERCISE**
+
+Use `build.sh` to find the binary representation of the three
+instructions in the following assembly code:
+
+----
+add $a0, $t0, $t1
+addiu $v0, $zero, 1
+syscall
+----
+
+Answer these questions before you move on:
+
+. What is the opcode for `add`?
+
+. What is the opcode for `addiu`?
+
+. What is the opcode for `syscall`?
+
+. Do the opcodes correspond to the info on
+http://booksite.elsevier.com/9780124077263/downloads/COD_5e_Greencard.pdf[the
+"green card"] in <<COD>>?  (Don't try to find the opcode for 'syscall' on the
+green card. It is not there.)
+
+. What type (or "format") are the different instructions? Remember that the
+opcode determines the type.
+
+. R-type instructions have a funct field. Find the funct code for all R-type
+instructions.
+
+. In the above example of `add`, we referenced the registers by numbers. Here,
+they are referenced by names (`v0`, `t0`, `zero` etc.) Use the "green card" to
+convert the names into the corresponding numbers.
+
+====
+
+=== Converting Hexadecimal to Decimal
+
+Let's try to use `build.sh` to find the binary representation of the six
+instructions in the following assembly code:
+
+.`~/ark/asm/play.S`
+----
+add $a0, $t0, $t1
+add $a0, $t0, $t1
+add $a0, $t0, $t1
+add $a0, $t0, $t1
+add $a0, $t0, $t1
+add $a0, $t0, $t1
+----
+
+----
+~/ark/asm$ ./build.sh play
+00000000: 00000001000010010010000000100000  ..  
+00000004: 00000001000010010010000000100000  ..  
+00000008: 00000001000010010010000000100000  ..  
+0000000c: 00000001000010010010000000100000  ..  
+00000010: 00000001000010010010000000100000  ..  
+00000014: 00000001000010010010000000100000  ..
+----
+
+We understand that the instructions are numbered 0, 4, 8, but then c? `xxd`
+numbers the instructions byte-wise and shows the offset as a hexadecimal (base
+16) number. Hexadecimal (or "hex") notation is a human-friendly representation
+of binary-coded values, as each hexadecimal digit represents four bits. Since
+we have to use 2 digits for the values 10, 11, 12, 13, 14, and 15 in base 10,
+we use the following scheme in base 16:
+
+----
+Decimal     | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 |
+Hexadecimal | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a  | b  | c  | d  | e  | f  |
+----
+
+Converting a number from hex to decimal is very similar to converting a binary
+number to decimal. In base 16, the value 42 is written as "2a". Let's verify
+this:
+
+----
+2*16^1 + 10*16^0 = 32 + 10 = 42
+----
+
+We can modify `build.sh` to dump the instruction in hexadecimal rather than
+binary notation by __omitting__ the `-bits` flag to `xxd`.
+
+This is the result:
+
+----
+$ ./build.sh play
+00000000: 01092020  ..  
+00000004: 01092020  ..  
+00000008: 01092020  ..  
+0000000c: 01092020  ..  
+00000010: 01092020  ..  
+00000014: 01092020  .. 
+----
+
+====
+
+**EXERCISE**
+
+Repeat the exercise in <<_my_first_shell_script>>, now with hexadecimal output
+from `xxd`.
+
+====
+
+=== Disassemble Like a Pro
+
+In practice, using `objcopy` and `xxd` is tedious, slow, and error-prone. If all
+you want to do is decode the contents of an object file, your tool of choice
+should be a __disassembler__. Among the GNU Binutils we have `objdump`:
+
+----
+~/ark/asm$ mips-elf-objdump -d play.o
+
+play.o:     file format elf32-bigmips
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0: 01091020  add v0,t0,t1
+----
+
+[TIP]
+.Arguments to GNU objdump
+====
+
+. `-d` tells `objdump` to disassemble all the executable sections of an object
+file and print the disassembly.
+
+====
+
+////
+====
+
+**EXERCISE**
+
+01091020 is hexadecimal notation for the bit-sequence
+00000001000010010001000000100000 above.
+
+Verify this using `xxd`. (Hint: which argument should we omit to `xxd`?)
+
+====
+////
+
+=== My First Executable
+
+Object files are not well-suited for execution.
+
+Change `play.S` back to the instruction `add $v0, $t0, $t1`, and assemble
+`play.S`. We can now use the cross-architecture GNU Linker, `mips-elf-ld` to
+link the object file:
+
+----
+~/ark/asm$ mips-elf-ld -o play.elf play.o
+mips-elf-ld: warning: cannot find entry symbol _start; defaulting to 0000000000400018
+----
+
+We will discuss this warning shortly.
+
+[TIP]
+.Arguments to the GNU Linker
+====
+
+. `-o play.elf` tells the assembler to name the resulting file `play.elf`.  If
+you omit this argument, the executable will be called `a.out`. As previously
+mentioned, `a.out` is named for a legacy executable and object file format, but
+it really is an ELF executable.
+
+====
+
+Your `~/ark/asm` directory should now look something like this:
+
+----
+~/ark/asm$ ls
+play.S  play.elf  play.o
+----
+
+Let's try to see what `file` has to say about `play.elf`:
+
+----
+~/ark/asm$ file play.elf
+play.elf: ELF 32-bit MSB executable, MIPS, MIPS32 version 1 (SYSV), statically linked, not stripped
+----
+
+`file` tells us that `play.elf` is an executable. Much like the object file,
+the executable is a 32-bit ELF file, intended for a MIPS32 architecture.
+
+What about the output of `readelf`?
+
+----
+~/ark/asm$ readelf --file-header play.elf 
+ELF Header:
+  Magic:   7f 45 4c 46 01 02 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF32
+  Data:                              2's complement, big endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              EXEC (Executable file)
+  Machine:                           MIPS R3000
+  Version:                           0x1
+  Entry point address:               0x400018
+  Start of program headers:          52 (bytes into file)
+  Start of section headers:          4504 (bytes into file)
+  Flags:                             0x50000000, mips32
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         2
+  Size of section headers:           40 (bytes)
+  Number of section headers:         8
+  Section header string table index: 5
+----
+
+A notable difference is the "Entry point address".
+
+For `play.o` `readelf` said this:
+
+----
+  Entry point address:               0x0
+----
+
+For `play.elf` `readelf` says this:
+
+----
+  Entry point address:               0x400018
+----
+
+This is __exactly__ what `mips-elf-ld` warned us about!
+
+----
+mips-elf-ld: warning: cannot find entry symbol _start; defaulting to 0000000000400018
+----
+
+The linker is looking for the label `_start` to set __that__ instruction as the
+entry point address. If it cannot find it, it sets the entry point address to
+be the very first instruction.
+
+But why is `0x400018` first? This has to do with historical and cultural
+conventions about how to structure the memory for a MIPS32 program. We will
+explore memory in detail in the G-assignments. For now, it is just important to
+show that `0x400018` indeed is the address of the first instruction. You can
+check this by trying to disassemble the executable using `objdump`:
+
+----
+~/ark/asm$ mips-elf-objdump -d play.elf 
+
+play.elf:     file format elf32-bigmips
+
+
+Disassembly of section .text:
+
+00400018 <_ftext>:
+  400018: 01091020  add v0,t0,t1
+----
+
+==== The Entry Point
+
+If you recall the section on <<_assembly_and_linking>>, the last step to
+loading an executable into execution is to set the program counter to the
+program entry point specified in the header of the ELF file.
+
+Contrary to popular belief, the conventional entry point is called `_start`
+(not `main`), as far as the linker is concerned. The linker is looking for a
+global label `_start`, but of course can't find one in `play.S`. We can
+modify the file as follows and avoid the warning:
+
+.~/ark/asm/play.S
+----
+  .globl _start
+_start:
+  add $v0, $t0, $t1
+----
+
+Let's take this for a spin:
+
+----
+~/ark/asm$ mips-elf-as -mips32 -o play.o play.S 
+~/ark/asm$ mips-elf-ld -o play.elf play.o
+~/ark/asm$ ls
+play.S  play.elf  play.o
+----
+
+=== Compiling C
+
+Writing assembly code by hand can be fun, but it is a slow and laborious
+process.  High-level languages, such as C, allows the programmer to ignore
+certain low-level details and solve the programming problem at a higher level
+of abstraction. A compiler then optimizes and translates C code into assembly
+code, or perhaps directly into machine code.
+
+The GNU Compiler Collection, or `gcc` contains a C compiler. This compiler
+produces assembly code which is then compiled by the GNU Assembler. This last
+step is hidden to the user. All you have to do is invoke `gcc` for native
+programs, and `mips-elf-gcc` for programs targeted at MIPS.
+
+Create a subdirectory for `~/ark/c` and navigate to it.
+
+----
+~/ark/asm$ cd ..
+~/ark$ mkdir c
+~/ark$ cd c
+~/ark/c$
+----
+
+Write a very simple C program in `~/ark/c/simple.c`
+
+.`~/ark/c/simple.c`
+----
+int main() {
+  return 42;
+}
+----
+
+Use `gcc` to compile this program. Run it, and check the exit code using
+`echo $?`:
+
+----
+~/ark/c$ gcc -o simple.elf simple.c
+~/ark/c$ ./simple.elf
+~/ark/c$ echo $?
+42
+~/ark/c$
+----
+
+For the sake of completeness, let's take a look at what `file` has to sample
+about `simple.elf`:
+
+----
+~/ark/c$ file simple.elf
+simple.elf: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=6ccb7badc3f576eeabf0dfb7e815b564a1a13c0c, not stripped
+----
+
+That looks complicated. Let's try `mips-elf-gcc` instead.
+
+----
+~/ark/c$ mips-elf-gcc -mips32 -o simple.elf simple.c
+/home/oleks/opt/cross/lib/gcc/mips-elf/5.1.0/../../../../mips-elf/bin/ld: warning: cannot find entry symbol _start; defaulting to 0000000000400050
+----
+
+That warning looks familiar! As mentioned in the previous section, the linker is looking for a global label named `_start`. But in this case, it can't find one in `main.c`.
+
+The best thing to do (to keep our code cross-platform) is to write a simple
+assembly file, `_start.S`, declaring a global `_start` label, and on `_start`
+jump to `main`.
+
+.`~/ark/c/_start.S`
+----
+  .globl _start
+_start:
+  j main
+----
+
+We can prepend this assembly file to the resulting assembly (before it is
+passed on to the linker) by simply prepending the file name when calling
+`mips-elf-gcc`:
+
+----
+~/ark/c$ mips-elf-gcc -mips32 -nostdlib -o simple.elf _start.S simple.c
+~/ark/c$
+----
+
+[TIP]
+.Arguments to mips-elf-gcc
+====
+
+. `-mips32` tells the assembler to assemble for a MIPS32 system. There are many
+variants of the https://en.wikipedia.org/wiki/MIPS_instruction_set[MIPS
+instruction set] out there, including e.g. MIPS64. We will only look at MIPS32.
+
+. `-nostdlib` tells the compiler to not include set up code for the C standard
+library. This setup code declares, among a wealth of other things, a `_start`
+label. If you forget this argument, your disassembly will look very
+complicated! 
+
+====
+
+Let's see what `file` has to say now:
+
+----
+~/ark/c$ file simple.elf 
+simple.elf: ELF 32-bit MSB executable, MIPS, MIPS32 version 1 (SYSV), statically linked, not stripped
+----
+
+This looks very familiar! What about `mips-elf-objdump`?
+
+----
+$ mips-elf-objdump -d simple.elf 
+
+simple.elf:     file format elf32-bigmips
+
+
+Disassembly of section .text:
+
+00400018 <_ftext>:
+  400018: 08100008  j 400020 <main>
+  40001c: 00000000  nop
+
+00400020 <main>:
+  400020: 27bdfff8  addiu sp,sp,-8
+  400024: afbe0004  sw  s8,4(sp)
+  400028: 03a0f021  move  s8,sp
+  40002c: 2402002a  li  v0,42
+  400030: 03c0e821  move  sp,s8
+  400034: 8fbe0004  lw  s8,4(sp)
+  400038: 27bd0008  addiu sp,sp,8
+  40003c: 03e00008  jr  ra
+  400040: 00000000  nop
+----
+
+If you are seeing something much more complicated when you disassemble,
+you probably forgot the `-nostdlib` argument to `mips-elf-gcc`.
+
+====
+
+**EXERCISE**
+
+Let's try a more complicated C program:
+
+----
+int main() {
+  int sum = 3;
+  int i;
+  for (i = 0; i < 8; i++) {
+    sum = 2*sum + i;
+  }
+  return sum;
+}
+----
+
+Read and try to understand what the compiler has produced. It is OK if not all
+things are clear. We will look more at assembly code later.
+
+====
+
+////
+=== Makefiles
+
+Often several steps are required in order to compile/assemble and link an
+executable, as above. It can be convenient to package these steps into a single
+terminal command.
+
+Make is a build system which runs the commands specified by targets. A target
+is specified with a name, and the first target is the default target.
+
+Create a file called `Makefile` in your directory for this assignment, and
+paste the following into it:
+
+.~/ark/Makefile
+----
+.PHONY: all clean
+
+SRC=$(patsubst %.S,%.elf,$(wildcard *.S))
+
+all: $(SRC)
+
+%.elf: %.S
+  mips-elf-as -mips32 -o $*.o --fatal-warnings $*.S
+  mips-elf-ld -o $*.elf $*.o
+
+clean:
+  rm -f *.o
+  rm -f *.elf
+----
+
+TODO: explain this Makefile better!!!
+
+Note that the indentation must be with tabs and not spaces. Once you have saved
+the file, you will be able to run the `make` command in the directory with the
+Makefile, and the default target (the first in the file) will be built, by
+running the three commands shown one after another, as you did manually before.
+`make clean` will delete the test binary files. The `.PHONY` target at the top
+of the file indicates that the targets `all` and `clean` do not produce files
+named `all` and `clean`.
+
+////
+
+== Optional: Roll Your Own Toolchains
+
+If you have a fresh http://antergos.com/[Antergos] or
+http://www.ubuntu.com/[Ubuntu] install, you can follow this guide and set up
+your own toolchains and avoid VirtualBox altogether.
+
+=== Native Architecture Toolchain
+
+First you need the native GNU Binutils, GNU Compiler Collection, and GNU Make.
+These tools are so ubiquitous that they have packages that include them and
+sound "essential" to the practicing programmer.
+
+====
+
+**Antergos**
+
+In your terminal, use `pacman` to install the package `build-devel`:
+
+----
+$ sudo pacman -S build-devel
+----
+
+You might already have this package installed. You will need to enter your
+password.
+
+====
+
+====
+
+**Ubuntu**
+
+In your terminal, use `apt-get` to install the package `build-essential`:
+
+----
+$ sudo apt-get install build-essential
+----
+
+You might already have this package installed. You will need to enter your
+password.
+
+====
+
+////
+ You will probably also need the package
+`texinfo` to complete the build process successfully.
+////
+
+
+=== MIPS Cross-Architecture Toolchain
+
+To cross-compile to the MIPS ELF executable format, you will need to compile
+your own GNU Binutils and GNU Compiler Collection, parametrized to target MIPS
+ELF.
+
+////
+This requires a cross-architecture toolchain. The following lines are commands
+which should be entered into a terminal (your shell), as indicated by the `$`
+symbol. The path before the dollar sign indicates what the present working
+directory is; `~` is the user's home directory. The actual command to execute 
+is the part after the dollar sign.
+////
+
+If it doesn't already exist, create a directory `opt` in your home directory,
+and change directory to it, then make a subdirectory called `cross`:
+
+----
+~$ mkdir opt
+~$ cd opt
+~/opt$ mkdir cross
+----
+
+==== GNU Binutils
+
+Download the source code for GNU Binutils, which includes the GNU Assembler and
+Linker.
+
+Before you get started, you need to install the `texinfo` package — the GNU
+documentation system.
+
+----
+~/opt$ wget http://ftp.gnu.org/gnu/binutils/binutils-2.25.tar.gz
+----
+
+////
+Environment variables in the shell must be set to allow the build process to
+know where we are building to, which platform we are building for and where
+relevant executables lie:
+
+----
+~/opt$ export PATH="$PATH:$HOME/opt/cross"
+----
+////
+
+Unpack the binutils archive (`binutils-2.25.tar.gz`):
+
+----
+~/opt$ tar zxvf binutils-2.25.tar.gz
+----
+
+And create a directory for the build process:
+
+----
+~/opt$ mkdir build-binutils
+~/opt$ cd build-binutils/
+----
+
+`make` is a build system, which is used to manage the assembly/compilation and
+linking of multiple files. Run the `configure` script to produce a Makefile
+with the selected options:
+
+----
+~/opt/build-binutils$ ../binutils-2.25/configure --target="mips-elf" --prefix="$HOME/opt/cross" --with-sysroot --disable-nls --disable-werror
+----
+
+[TIP]
+.Configuration arguments for GNU Binutils
+====
+. `--target=mips-elf` sets Binutils up to work with the MIPS architecture and the ELF executable format.
+. `--prefix=$HOME/opt/cross` sets Binutils to install in the directory `$HOME/opt/cross`.
+
+The remaining arguments are technical nuances.
+
+====
+
+Finally, `make` and `make install` binutils:
+
+----
+~/opt/build-binutils$ make
+~/opt/build-binutils$ make install
+----
+
+This may take a while. Here's an XKCD comic:
+
+.XKCD: Compiling (source: http://xkcd.com/303/).
+image::http://imgs.xkcd.com/comics/compiling.png[align="center"]
+
+[TIP]
+.Troubleshooting
+====
+
+If you ran `./configure` without having GNU Binutils, GNU Compiler Collection
+or GNU documentation system installed, things fail. Here's what you should do:
+
+. `~/opt$ rm -r build-binutils`
+. `~/opt$ rm -r binutils-2.25`
+. Go back to the start, <<_optional_roll_your_own_toolchains>>.
+====
+
+==== GNU Compiler Collection
+
+Before you get started, you need to install the following packages:
+
+* For Antergos, install `gmp`, `mpfr`, and `libmpc`.
+
+* For Ubuntu, install `libgmp3-dev`, `libmpfr-dev`, and `libmpc-dev`.
+
+----
+~/opt$ wget http://ftp.gnu.org/gnu/gcc/gcc-5.1.0/gcc-5.1.0.tar.gz
+----
+
+Unpack the archive and create a folder `~/opt/build-gcc/`. Configure the GNU
+Compiler Collection sources:
+
+----
+~/opt/build-gcc$ ../gcc-5.1.0/configure --target="mips-elf"  --prefix="$HOME/opt/cross" --disable-nls --enable-languages=c --without-headers
+----
+
+The configuration arguments for the GNU Compiler Collection are very similar to
+those for GNU Binutils.
+
+There's a bit more to do to make and install the GNU Compiler Collection:
+
+----
+~/opt/build-gcc$ make all-gcc
+~/opt/build-gcc$ make all-target-libgcc
+~/opt/build-gcc$ make install-gcc
+~/opt/build-gcc$ make install-target-libgcc
+----
+
+Again, some of these will take a while. Do as the XKCD comic suggests.
+
+==== Modify Your PATH
+
+Your `~/opt/cross/bin` directory should now look something like this:
+
+----
+$ ls ~/opt/cross/bin/
+mips-elf-addr2line  mips-elf-gcc-5.1.0    mips-elf-ld.bfd   mips-elf-strings
+mips-elf-ar         mips-elf-gcc-ar       mips-elf-nm       mips-elf-strip
+mips-elf-as         mips-elf-gcc-nm       mips-elf-objcopy
+mips-elf-c++filt    mips-elf-gcc-ranlib   mips-elf-objdump
+mips-elf-cpp        mips-elf-gcov         mips-elf-ranlib
+mips-elf-elfedit    mips-elf-gcov-tool    mips-elf-readelf
+mips-elf-gcc        mips-elf-ld           mips-elf-size
+----
+
+To ensure that all these tools are available for use by scripts etc., add the
+path containing the newly built binaries to your `$PATH`. For `bash` (usually
+the default shell), add the following line at the end of the `.bashrc` file in
+your home directory:
+
+.`~/.bashrc`
+----
+export PATH="$HOME/opt/cross/bin:$PATH"
+----
+
+You will need to restart your shell for this to take effect. The easiest way to
+do this system-wide is to restart your computer.
+
+== References
+
+[bibliography]
+
+. [[[COD]]]  David A. Patterson and John L. Hennessy. _Computer Organization
+  and Design_.  Elsevier. 5th or 4th edition.
+
+== Major Contributors
+
+This text was made possible by the hard and enduring work of the entire ARK15
+Course Team, and in particular the following members of the team:
+
+* Oleksandr Shturmov <oleks@oleks.info>
+* Annie Jane Pinder <anpi@di.ku.dk>
+
+A special thanks to Phillip Alexander Roschnowski <roschnowski@gmail.com> for
+the meticulous proof-reading, and Thorkil Kowalski Værge <thorkilk@gmail.com>
+for exercise ideas.
