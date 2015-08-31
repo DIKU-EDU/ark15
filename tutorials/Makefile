@@ -12,3 +12,5 @@ pdf: linux-toolchains-and-assembly.pdf
 
 clean:
 	rm -f *.html
+	rm -f *.pdf
+	rm -f *.pdfmarks
