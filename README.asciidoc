@@ -3,6 +3,21 @@
 This is a companion git-repository for the course materials. If you have any
 comments or corrections, feel free to open issues and make pull requests.
 
+== Important Student Notice
+
+**Don't publicly fork this repository, or otherwise make your course work
+public before you have passed this course.**
+
+The Copenhagen University policy is that a student that keeps their work
+public, is an accomplice to plagiarism, should any other student choose to copy
+their work.
+
+You are of course, completely safe to
+https://help.github.com/articles/importing-a-git-repository-using-the-command-line/[clone
+this repository], and keep a local, working copy,
+https://help.github.com/articles/fetching-a-remote/[pulling this remote] as the
+course progresses.
+
 == Tutorials
 
 * link:tutorials/linux-toolchains-and-assembly.asciidoc[Linux, Toolchains, and Assembly]
