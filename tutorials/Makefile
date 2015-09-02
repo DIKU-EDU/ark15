@@ -1,4 +1,4 @@
-.PHONY: clean
+.PHONY: clean all pdf
 
 all: linux-toolchains-and-assembly.html
 
