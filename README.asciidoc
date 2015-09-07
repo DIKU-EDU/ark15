@@ -22,8 +22,8 @@ course progresses.
 
 * link:tutorials/linux-toolchains-and-assembly.asciidoc[Linux, Toolchains, and Assembly]
 
-== Assignments
+== G-Assignments
 
-. link:g-assignments/g1.asciidoc[Linux, Toolchains, and Assembly]
+. link:g-assignments/1st/g1.asciidoc[Interpreting Instructions — Simulating Machines]
 
 (More coming soon.)
