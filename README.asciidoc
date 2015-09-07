@@ -24,4 +24,6 @@ course progresses.
 
 == Assignments
 
-(Coming soon.)
+. link:g-assignments/g1.asciidoc[Linux, Toolchains, and Assembly]
+
+(More coming soon.)
