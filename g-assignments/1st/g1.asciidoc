@@ -278,7 +278,7 @@ MARS MIPS simulator when playing around with MIPS32 assembly.
 === Start With The Handout
 
 Download and unpack the handed out
-http://static.ark15.onlineta.org/g1-handout-v1.0.tar.gz[g1-handout.tar.gz]
+http://static.ark15.onlineta.org/g1-handout-v1.0.tar.gz[g1-handout-v1.0.tar.gz]
 archive.
 
 "link:https://en.wikipedia.org/wiki/Tar_(computing)[tar]" is a classic
