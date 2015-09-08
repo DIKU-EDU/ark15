@@ -34,12 +34,16 @@ section {
 table {
   font-size:15px;
   width:inherit;
+  table-layout:fixed;
 }
 table, th, td {
   border: 1px solid black;
 }
 thead {
   font-weight:bold;
+}
+td {
+  padding:0;
 }
 #config {
   margin:30px 0 0 0;
@@ -49,7 +53,7 @@ thead {
   margin-top:0;
 }
 #answer {
-  width:800px;
+  width:100%;
 }
 .big {
   font-size:30px;
@@ -60,52 +64,62 @@ thead {
   padding: 30px;
 }
 .help {
-  margin: 30px 0 30px 0;
+  margin: 15px 0 30px 0;
 }
-#complement {
-  margin: 15px 0 0 0;
+#op {
+  width:100px;
 }
 </style>
-<title>Train Your Number Representations</title>
+<title>Train Your Arithmetic</title>
 </head>
 <body>
 <section>
 <div>Created by <a href="http://www.diku.dk/" target="_blank">Penthouse Productions™</a></div>
 <div id="config">
-  Take
-  <select id="bits" onchange="manualOverride()">
+  Do
+  <select id="op_select" onchange="generate()">
+    <option value="+">addition</option>
+    <option value="-">subtraction</option>
+    <option value="*">multiplication</option>
+    <option value="/">division</option>
+  </select>
+  of
+  <select id="bits" onchange="generate()">
     <option value="1">4 (medium)</option>
     <option value="2">8 (hard)</option>
     <option value="4">16 (difficult)</option>
     <option value="8">32 (unreasonable)</option>
   </select>
-  bits from base
-  <select id="from_base" onchange="manualOverride()">
+  bits in base
+  <select id="base" onchange="generate()">
     <option value="2">2</option>
     <option value="10">10</option>
     <option value="16">16</option>
-    <option value="32">32 (expert)</option>
+    <option value="32">32 (expert mode)</option>
   </select>
-  to base
-  <select id="to_base" onchange="manualOverride()">
-    <option value="2">2</option>
-    <option value="10">10</option>
-    <option value="16">16</option>
-    <option value="32">32 (expert)</option>
-  </select>
-</div>
-<div>
-  <input type="checkbox" id="complement" onchange="generate()">Use two's complement arithmetic</input>
 </div>
 <div class="help">
   Wait, what?
   <a href="http://cs50.tv/2012/fall/shorts/binary/binary-720p.mp4" target="_blank">Bits?</a>
-  <a href="http://www.cs.cornell.edu/~tomf/notes/cps104/twoscomp.html" target="_blank">Two's complement?</a>
   <a href="https://en.wikipedia.org/wiki/Hexadecimal" target="_blank">Hex?</a>
   Where are the <a href="#" onClick='window.location="view-source:" + window.location.href'>cheat codes?</a>
 </div>
-<div id="problem" class="big"></div>
-<input id="answer" class="big" type="text" onkeypress="keypress(event)"/>
+<table class="big">
+<tbody>
+<tr>
+  <td id="op" rowspan="2"></td>
+  <td id="fst"></td>
+</tr>
+<tr>
+  <td id="snd"></td>
+</tr>
+<tr>
+  <td></td>
+  <td>
+    <input id="answer" class="big" type="text" onkeypress="keypress(event)"/>
+  </td>
+</tbody>
+</table>
 <div class="points">Correct: <span id="points"></span></div>
 <table>
   <thead>
@@ -120,54 +134,6 @@ var BAD_COLOR = "OrangeRed";
 
 var count = 0;
 var goodCount = 0;
-
-var LEVELS = [
-  [5, false, 0, 0, 1, "Looking great, but are you a hexor?"],
-  [5, false, 0, 2, 1, "Very well, now let's try with two's complement!"],
-  [5, true,  0, 0, 1, "Think you're good? Let's try hex to binary!"],
-  [5, true,  0, 2, 0, "Looking great, but are you a true two's complement hexor? Take hex to decimal."],
-  [5, true,  0, 2, 1, "Travel safe young padawan."]
-];
-
-var levelIdx = 0;
-var progress = 0;
-
-function nextLevel() {
-  levelIdx += 1;
-
-  if (levelIdx > LEVELS.length) {
-    return;
-  }
-
-  var curLevel = LEVELS[levelIdx];
-
-  byId("complement").checked = curLevel[1];
-  byId("bits").selectedIndex = curLevel[2];
-  byId("from_base").selectedIndex = curLevel[3];
-  byId("to_base").selectedIndex = curLevel[4];
-
-  progress = 0;
-  generate();
-}
-
-function maybeNextLevel() {
-
-  if (levelIdx > LEVELS.length) {
-    return;
-  }
-
-  progress += 1;
-
-  var curLevel = LEVELS[levelIdx];
-
-  if (progress != curLevel[0]) {
-    return;
-  }
-
-  if (confirm(curLevel[5])) {
-    nextLevel();
-  }
-}
 
 function byId(id) {
   return document.getElementById(id);
@@ -206,43 +172,50 @@ function inBase(number, base) {
 
 var hamster = 0;
 var number = 0;
+var problem = "";
 
 function getMaxRand() {
   return parseInt("F".repeat(parseInt(byId("bits").value, 10)), 16);
 }
 
-function genRand(origin) {
+function genRandNum() {
   var max_rand = getMaxRand();
-  var rand = origin;
-
-  if (byId("complement").checked) {
-    while (rand === origin) {
-      rand = Math.floor(
-        Math.random() * max_rand - ((max_rand + 1) >>> 1));
-    }
-  } else {
-    while (rand === origin) {
-      rand = Math.floor(Math.random() * max_rand);
-    }
-  }
-  return rand;
+  return Math.floor(
+    Math.random() * max_rand - ((max_rand + 1) >>> 1));
 }
 
-function manualOverride() {
-  progress = 100;
-  generate();
+function doOp(op, fst_num, snd_num) {
+  switch (op) {
+  case "+":
+    return fst_num + snd_num;
+  case "-":
+    return fst_num - snd_num;
+  case "*":
+    return fst_num * snd_num;
+  case "/":
+    return ~~(fst_num / snd_num);
+  }
 }
 
 function generate() {
 
-  var from_base = parseInt(byId("from_base").value, 10);
-  var to_base = parseInt(byId("to_base").value, 10);
+  var base = parseInt(byId("base").value, 10);
 
-  number = genRand(number);
+  var fst_num = genRandNum();
+  var snd_num = genRandNum();
+  var op = byId("op_select").value;
+  var fst = inBase(fst_num, base);
+  var snd = inBase(snd_num, base);
 
-  byId("problem").innerHTML = inBase(number, from_base);
+  problem = fst + " " + op + " " + snd;
 
-  hamster = inBase(number, to_base);
+  byId("fst").innerHTML = fst;
+  byId("snd").innerHTML = snd;
+  byId("op").innerHTML = op;
+
+  number = doOp(op, fst_num, snd_num);
+
+  hamster = inBase(number, base);
 
   byId("answer").value = "";
   byId("answer").focus();
@@ -270,7 +243,6 @@ function updatePoints() {
 }
 
 function log(color) {
-  var problem = byId("problem").innerHTML;
   var answer = byId("answer").value;
   var solution = hamster;
 
@@ -293,8 +265,6 @@ function check() {
     flashbg(BAD_COLOR);
   }
 
-  maybeNextLevel();
-
   generate();
 }
 
@@ -304,8 +274,7 @@ function keypress(e) {
   }
 }
 
-byId("from_base").selectedIndex = 0;
-byId("to_base").selectedIndex = 1;
+byId("base").selectedIndex = 0;
 generate();
 </script>
 </body>
