@@ -156,8 +156,6 @@ function maybeNextLevel() {
     return;
   }
 
-  progress += 1;
-
   var curLevel = LEVELS[levelIdx];
 
   if (progress != curLevel[0]) {
@@ -289,12 +287,13 @@ function check() {
   if (byId("answer").value == hamster) {
     flashbg(GOOD_COLOR);
     goodCount += 1;
+    progress += 1;
   } else {
     flashbg(BAD_COLOR);
+    progress -= 1;
   }
 
   maybeNextLevel();
-
   generate();
 }
 
