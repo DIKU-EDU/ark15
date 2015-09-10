@@ -1,6 +1,6 @@
 = G1: Interpreting Instructions — Simulating Machines
 Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Major Contributors
-v1.0, September 7, 2015
+v1.1, September 10, 2015
 :doctype: article
 :backend: html5
 :docinfo:
@@ -61,8 +61,8 @@ in doubt about what you are doing.
 
 Your task is to write a simulator for a subset of the MIPS32 ISA. The simulator
 must be written in C. It must support the following MIPS instructions: `addu`,
-`addiu`, `and`, `andi`, `beq`, `bne`, `j`, `jal`, `jr`, `lw`, `nor`, `or`,
-`ori`, `sll`, `slti`, `slt`, `srl`, `subu`, `sw`, and halt when it sees a
+`addiu`, `and`, `andi`, `beq`, `bne`, `j`, `jal`, `jr`, `lw`, `lui`, `nor`,
+`or`, `ori`, `sll`, `slt`, `slti`, `srl`, `subu`, `sw`, and halt when it sees a
 `syscall` instruction.
 
 The simulator must take two command-line arguments: A configuration file, and
@@ -83,8 +83,8 @@ file that looks like this:
 ----
 
 After simulating the program in the given ELF file, the simulator should print
-the number of instructions executed and the contents of the most interesting
-registers in hex. The output must must be in the following "printf syntax":
+the number of instructions executed and the contents of some prominent
+registers in hex. The output must be in the following "printf syntax":
 
 ----
 Executed %zu instruction(s).
@@ -111,8 +111,8 @@ For the configuration given above, and a program that contains _just_ the
 `syscall` instruction, your simulator must halt with the following output:
 
 ----
-Ran 1 instructions(s).
-pc = 0x0
+Executed 1 instruction(s).
+pc = 0x40001c
 at = 0x0
 v0 = 0x0
 v1 = 0x0
@@ -124,7 +124,7 @@ t4 = 0x0
 t5 = 0x2a
 t6 = 0x0
 t7 = 0x0
-sp = 0x0
+sp = 0x49fffc
 ra = 0x0
 ----
 
@@ -278,7 +278,7 @@ MARS MIPS simulator when playing around with MIPS32 assembly.
 === Start With The Handout
 
 Download and unpack the handed out
-http://static.ark15.onlineta.org/g1-handout-v1.0.tar.gz[g1-handout-v1.0.tar.gz]
+http://static.ark15.onlineta.org/g1-handout-v1.1.tar.gz[g1-handout-v1.1.tar.gz]
 archive.
 
 "link:https://en.wikipedia.org/wiki/Tar_(computing)[tar]" is a classic
@@ -311,7 +311,7 @@ Makefiles are explained in detail below.
 You can use the `tar` command-line utility to unpack the archive:
 
 ----
-~/ark$ tar xvf g1-handout.tar.gz
+~/ark$ tar xvf g1-handout-v1.1.tar.gz
 ----
 
 === Getting Started with C
@@ -416,12 +416,12 @@ the `./` prefix to tell the shell to look for a locally referenced executable.
 
 ==== More on Header Files
 
-Header files have extension `.h`, and are usually used for preprocessor
-definition directives, data structure definitions, and function prototypes.
-Function prototypes are function definitions with no corresponding body, which
-specify the __shape__ of the function. The compiler then knows to look in the
-corresponding `.c`, or compiled `.o`  file for the actual implementation of the
-function.
+Header files have the filename extension `.h`, and are usually used for
+preprocessor definition directives, data structure definitions, and function
+prototypes. Function prototypes are function definitions with no corresponding
+body, which specify the __shape__ of the function. The compiler then knows to
+look in the corresponding `.c`, or compiled `.o`  file for the actual
+implementation of the function.
 
 The angular brackets in the directive
 
@@ -445,7 +445,7 @@ When using quotes (`""`) rather than chevrons (`<>`), the C preprocessor will
 first and foremost look for the header file in the local directory relative to
 the including file. In our case, `~/ark/1st/sim.c`. Conversely, when using
 chevrons, the C preprocessor will start by looking at the system-wide include
-directories first, such as e.g. `/usr/include/`.
+directories first, such as `/usr/include/`.
 
 ====
 
@@ -465,7 +465,8 @@ object file in memory:
 ~/ark/1st$ gcc -o sim sim.c
 ----
 
-Note, that we pass in the C file, not the object file as we did before.
+Note, that we pass the C filename as an argument, not the object file as we did
+before.
 
 ====
 
@@ -474,7 +475,7 @@ Note, that we pass in the C file, not the object file as we did before.
 `make` is a canonical command-line utility, used in Unix-like programming
 environments for building software projects of all shapes and sizes. We will
 only briefly mention some of the aspects of `make`. If you want to know more
-about make, we can humbly recommend http://www.ploxiln.net/make.html[this
+about make, we humbly recommend http://www.ploxiln.net/make.html[this
 tutorial].
 
 The `make` command revolves around the notion of a `Makefile`. Create a file
@@ -527,6 +528,20 @@ this is the most recent C language standard.
 
 ====
 
+[IMPORTANT]
+.Unused parameters
+====
+
+If you try to compile `sim.c` with the above arguments to `gcc`, compilation
+will fail, and `gcc` will tell you that `argc` and `argv` are "unused
+parameters". Add the line `argc = argc; argv = argv;` to the beginning of
+`main` to trick `gcc` into thinking that these variables are in use. At some
+later stage, when `argc` and `argv` are in actual use (i.e. serve a purpose in
+the body of your `main` function), you can remove this line again.
+
+====
+
+
 A Makefile is structured in terms of __rules__. A rule is a list of
 __targets__, followed by a list of __prerequisites__, and a __recipe__.
 
@@ -538,7 +553,8 @@ assume that system libraries, such as `stdio.h`, don't change very often, so
 they don't count as dependencies.) The recipe is also used for bringing the
 target __up to date__ with its prerequisites.
 
-Add the following rule to your Makefile (below the `CC` and `CFLAGS` variables):
+Add the following rule to your Makefile (below the `CC` and `CFLAGS`
+variables):
 
 ----
 sim: mips32.h sim.c
@@ -563,9 +579,11 @@ To quote the http://www.gnu.org/software/make/manual/make.html#Introduction[GNU
 `make` manual]: "This is an obscurity that catches the unwary."
 ====
 
-Now try typing `make` in your terminal to build `sim`:
+Remove your previous build of `sim`, and type `make` in the terminal to build
+it once again:
 
 ----
+~/ark/1st$ rm sim
 ~/ark/1st$ make
 gcc -Werror -Wall -Wextra -pedantic -std=c11 -o sim sim.c
 ~/ark/1st$ make
@@ -703,11 +721,11 @@ value `42`, we can provide a configuration file like this:
 0
 ----
 
-So if we have, `default.cfg` and an ELF executable `~/ark/1st/asm/nor.elf`, we
+So if we have, `default.cfg` and an ELF executable `~/ark/1st/asm/addu.elf`, we
 want to execute the simulator (which we'll call `sim`) like this:
 
 ----
-~/ark/1st$ ./sim default.cfg asm/nor.elf
+~/ark/1st$ ./sim default.cfg asm/addu.elf
 ----
 
 The `argc` and `argv` arguments in your `main` function can be used to fetch
@@ -718,13 +736,13 @@ given, before calling any other functions which use these arguments.
 
 ***EXERCISE***
 
-Write an `if` statement in your `main` function, that checks that the number of
+Write an `if` statement in your `main` function, that checks if the number of
 arguments is 3.  The first argument will always be the name of the executable
 (e.g. `"./sim"`). The rest, as passed on the command line.  For instance, for
 the example above, the three arguments will be `"./sim"`, `"default.cfg"`, and
-`"asm/nor.elf"` (in that order).
+`"asm/addu.elf"` (in that order).
 
-If there are, as expected, three arguments, then call a function called
+If there are three arguments as expected, then call a function called
 `read_config`, which takes one parameter, namely the second argument
 (`argv[1]`).  Otherwise, print a
 https://en.wikipedia.org/wiki/Usage_message[usage message] informing the user
@@ -821,10 +839,9 @@ done in 3 steps:
 
 ==== Opening and Closing Files
 
-An open file is identified by a non-negative integer, known as a __file
-descriptor__, which is provided by the operating system when the file is
-opened. The function `fopen` (also in `stdio.h`) can be used to open a file.
-The __manual page__ for `fopen` can be
+It is convenient to handle the files on your computer as streams of bytes. The
+function `fopen` (also in `stdio.h`) can be used to open a file as a stream of
+bytes.  The __manual page__ for `fopen` can be
 http://man7.org/linux/man-pages/man3/fopen.3.html[found online], or read in the
 terminal by typing:
 
@@ -842,10 +859,11 @@ Replace the first two lines of the body of your `read_config` function with the
 single line:
 
 ----
-FILE *fdesc = fopen(path, "r");
+FILE *stream = fopen(path, "r");
 ----
 
-which gives a file descriptor for the file, opened in read-only mode. 
+which gives a file stream, opened in read-only mode, i.e. we can only read
+bytes off of the stream, but not e.g. write bytes to it.
 
 ====
 
@@ -866,12 +884,12 @@ constant).
 **EXERCISE**
 
 Define a function stub `read_config_stream`, which takes a single variable of
-type `FILE *` as parameter and returns an integer. Call this function once the
-file has been opened with `fdesc` as argument. Use
-http://man7.org/linux/man-pages/man3/fclose.3.html[the man page] for `fclose`
-to find out how to close the file again in `read_config`, after the call to
-`read_config_stream`. Return `ERROR_IO_ERROR` if `fclose` returns anything
-other than 0. If `fclose` does return 0, return the return value of
+type `FILE *` as parameter and returns an integer. Call this function in
+`read_config` with `stream` as the argument, once the file has been properly
+opened.  Use http://man7.org/linux/man-pages/man3/fclose.3.html[the man page]
+for `fclose` to find out how to close the stream again in `read_config`, after
+the call to `read_config_stream`. Return `ERROR_IO_ERROR` if `fclose` returns
+anything other than 0. If `fclose` does return 0, return the return value of
 `read_config_stream` from `read_config`.
 
 ====
@@ -888,21 +906,20 @@ http://man7.org/linux/man-pages/man3/scanf.3.html[`fscanf`] in every iteration
 to read an unsigned integer into the appropriate slot of the `regs` array. You
 should only initialize the registers `t0` to `t7`.
 
-The `fscanf` function takes three (or more) arguments: A file descriptor
-(`FILE *`), a format string, and one or more pointer arguments (whose type(s)
-must correspond appropriately to the pattern in the format string). For
-instance, the code
+The `fscanf` function takes three (or more) arguments: A file stream (`FILE
+*`), a format string, and one or more pointer arguments (whose type(s) must
+correspond appropriately to the pattern in the format string). For instance,
+the code
 
 ----
 uint32_t v;
-fscanf(fdesc, "%u", &v);
+fscanf(stream, "%u", &v);
 ----
 
-scans from the current position in the file descriptor `fdesc`, finds the first
-group of bytes that looks like a textual representation of an unsigned integer
-(`%u`), constructs an actual `uint32_t` value based on these bytes, and puts
-that value into the variable `v`. It is useful to think of a file descriptor as
-a __stream__ of bytes: With each call to `fscanf`, you are searching further
+scans from the current position of `stream`, finds the first group of bytes
+that looks like a textual representation of an unsigned integer (`%u`),
+constructs an actual `uint32_t` value based on these bytes, and puts that value
+into the variable `v`. With each call to `fscanf`, we are searching further
 down the stream for bytes that look like the string representation of an
 unsigned integer.
 
@@ -965,8 +982,8 @@ automated testing.
 For the `default.cfg` given above, this should result in the following output:
 
 ----
-Ran 0 instrucitons(s).
-pc = 0x0
+Executed 1 instruction(s).
+pc = 0x40001c
 at = 0x0
 v0 = 0x0
 v1 = 0x0
@@ -978,7 +995,7 @@ t4 = 0x0
 t5 = 0x2a
 t6 = 0x0
 t7 = 0x0
-sp = 0x0
+sp = 0x49fffc
 ra = 0x0
 ----
 
@@ -1128,7 +1145,7 @@ get a bit overwhelming, so let's recap:
 | `uint16_t` | Unsigned (nonnegative) 16-bit integers. | (None) | `stdint.h`
 | `uint32_t` | Unsigned (nonnegative) 32-bit integers. | Modelling 32-bit registers. | `stdint.h`
 | `unsigned char` | Smallest addressable unit of the machine that can contain a basic character set (typically an unsigned 8-bit integer).  | Modelling bytes in memory. | (Nothing)
-| `size_t`  | Memory sizes and offsets. | `instr_cnt` and fourth argument to `elf_dump`. | `stddef.h`
+| `size_t`  | Memory sizes and offsets. | `instr_cnt` and fourth argument to `elf_dump`. | `stdio.h`
 |===
 
 ====
@@ -1138,9 +1155,10 @@ get a bit overwhelming, so let's recap:
 
 ==== Memory Layout and Endianness
 
-At this point you might be wondering how come the entry point is so high. For
-instance, the entry point always seems to be something like `0x400018`
-(somewhere beyond 4MB), while we only allocate 640 KB of memory.
+If you try to print the hex-value of `PC` after performing an `elf_dump`, you
+will see that the entry point is something like `0x400018` (somewhere beyond
+4MB). How come the entry point is so high? If there are this many instructions,
+how come `elf_dump` succeeds even though we only allocate 640KB of memory?
 
 This has to do with the conventional memory layout of a MIPS32 process, and how
 `elf_dump` supports this memory layout. You can read more about the MIPS32
@@ -1179,15 +1197,14 @@ before dealing with the memory component. For instance, we can use
 
 After successfully initializing registers and memory in `main`, set the `SP`
 (stack pointer register) to point to the top of the stack. This is the 4th last
-byte in `mem`. As any memory address, the stack pointer should also be offset
-by `MIPS_RESERVE` (`0x400000`, defined in `mips32.h`).
+byte in `mem`. As with any other memory address, the stack pointer should be
+offset by `MIPS_RESERVE` (`0x400000`, defined in `mips32.h`).
 
 ====
 
 `GET_BIGWORD` and `SET_BIGWORD` do more than merely offset the addresses. You
-might have also noticed that MIPS32 is a so-called "big-endian" architecture,
-while your own machine is likely an x86-64 architecture, which is
-"little-endian".
+might have noticed that MIPS32 is a so-called "big-endian" architecture, while
+your own machine is likely an x86-64 architecture, which is "little-endian".
 
 The best choice of https://en.wikipedia.org/wiki/Endianness[endianness] is
 subtle, often accidental, and there is no clear benefit of one over the other.
@@ -1210,12 +1227,12 @@ $4, $5`:
 00100001 00010000 10000101 00000000
 ----
 
-With the ELF file format, the memory segments are stored in the format expected
-by the target architecture. So for MIPS32, big-endian.  `elf_dump` performs no
-endianness conversion before storing data in `mem`, and so all data in `mem` is
-in big-endian format. Luckily, you don't have to think too much about this as
-long as you use the macros `GET_BIGWORD` and `SET_BIGWORD` whenever you're
-dealing with memory.
+In the ELF file format, the memory segments are stored with an endianness
+expected by the target architecture. So for MIPS32, big-endian.  `elf_dump`
+performs no endianness conversion before storing data in `mem`, and so all data
+in `mem` is in big-endian format. Luckily, you don't have to think too much
+about this as long as you use the macros `GET_BIGWORD` and `SET_BIGWORD`
+whenever you're dealing with memory.
 
 ====
 
@@ -1261,11 +1278,11 @@ before going from step to step.
 
 `interp` should run an infinite loop, counting up the `instr_cnt` variable in
 every iteration. To perform an iteration, you should get the instruction
-currently pointed to by `PC`, increment the `PC`.
+currently pointed to by `PC`, and increment the `PC`.
 
-To actually interpret the instructions (perhaps having an effect on either the
-contents of the `regs` or `mem`), define a function stub `interp_inst`, which
-takes the instruction as a `uint32_t` argument.
+To actually interpret the instructions (which might have an effect on either
+the contents of the `regs` or `mem`), define a function stub `interp_inst`,
+which takes the instruction as a `uint32_t` argument.
 
 The return value of `interp_inst` should determine whether to continue or break
 out of the loop:
@@ -1314,30 +1331,20 @@ processed.
 ====
 ////
 
-The opcode of an instruction is the highest 6 bits of the instruction. The
-opcode can be obtained as follows:
-
-----
-unsigned int opcode = inst >> 26;
-----
-
-where `inst` is the `uint32_t` instruction. Note that this shifting may only
-work on unsigned integers; if the number was a signed negative number, the
-first digit of the number would be 1, which would be replicated to fill the
-holes caused by the shifting, in order to maintain the sign. This is known as
-sign extension. However, as we are working with unsigned integers here, the
-holes are filled with 0s.
+The opcode of an instruction is located in its 6 most significant bits. A macro,
+`GET_OPCODE` has been defined in `mips.h` to extract these bits for you. The code
+`GET_OPCODE(inst)` returns the opcode of the instruction `inst`.
 
 ====
 
 **EXERCISE**
 
-In `interp_instr`, use a `switch ... case` construct on the extracted opcode.
+In `interp_inst`, use a `switch ... case` construct on the extracted opcode.
 Symbols have been defined corresponding to the different instructions by
 `#define` preprocessor directives in the provided `mips32.h` header file. If
 the instruction being handled is an R-type instruction, then call a function
-`interp_r`, which takes the reconstructed instruction as an argument. All the
-other defined opcodes should result in a call to a specific function for that
+`interp_r`, which also takes the instruction as an argument. All the other
+defined opcodes should result in a call to a specific function for that
 instruction.  Remember to break after each case!
 
 The default case should return `ERROR_UNKNOWN_OPCODE`.
@@ -1397,21 +1404,19 @@ The J-type instructions have the format:
 [     opcode    ] [                             address                             ]
 ----
 
-The address field of a J-type instruction is only 26 bits long, and we wish to
-index addresses that are 32 bits long. As instructions are word aligned, we can
-left-shift the address field by 2, to provide a word aligned address. The upper
-4 bits are taken from the upper 4 bits of the incremented Program Counter
-(`pc`), yielding a "pseudodirect" address (see <<COD>> page 117, figure 2.18).
-The jumps are implemented by simply replacing the lower 28 bits of the `pc`
-variable with the left-shifted address field from the instruction. The `pc`
-should have been incremented to point to the next instruction at this stage.
+The address field of a J-type instruction is 26 bits long. As instructions are
+word aligned, we left-shift the address field by 2, to provide a word-aligned
+address. The (remaining) upper 4 bits are taken from the upper 4 bits of the
+incremented Program Counter (`PC`). This is called "pseudodirect addressing"
+(see also <<COD>>).
 
 ====
 
 **EXERCISE**
 
 Implement the `j` and `jal` instructions in their own functions, called from
-`interp`. The macro `GET_ADDRESS` has been defined for you in `mips32.h`.
+`interp`. The macros `GET_ADDRESS` and `MS_4B` has been defined for you in
+`mips32.h`.
 
 ====
 
@@ -1424,29 +1429,28 @@ The immediate instructions have the format:
 [     opcode    ] [     rs     ] [     rt     ] [             immediate             ]
 ----
 
-The immediate instructions operate on two registers, with a 16 bit constant.
-The 16 bit constant must be extended to 32 bits. Depending on the instruction,
-this number can be either signed or unsigned, and either a sign-extension or a
-zero-extension must be carried out in each case. After using the macro
-`GET_IMM`, the result must be cast to either a signed or unsigned 16 bit wide
-integer (`int16_t` and `uint16_t` from the library `stdint.h` respectively).
-Then, casting this to a signed 32 bit integer (`int32_t`) will ensure that it
-is sign or zero extended respectively. A macro `SIGN_EXTEND` has been provided.
-This sign-extended immediate must then be shifted left by 2 bits to yield the
-PC-relative address.
+The immediate instructions operate on two registers and a 16 bit constant.
+This constant must be extended to 32 bits. Depending on the instruction, the
+constant is either sign-extended or zero-extended (or in the case of `lui`,
+shifted left). If you are in doubt about what to choose, take a look at the
+Verilog examples on the "green card" in <<COD>>. The macros `GET_IMM`,
+`SIGN_EXTEND`, and `ZERO_EXTEND` have been provided. After using `GET_IMM` to
+extract the immediate field (the 16 bit constant), you can use one of the
+`_EXTEND` macros to either sign- or zero-extend the constant.
 
 ====
 
 **EXERCISE**
 
-. Implement the `beq` and `bne` instructions. Note that the addresses for the
-branching instructions are contained in the immediate field, and are
-word-aligned, PC-relative addresses.
+. Implement the `beq` and `bne` instructions. Note, that the addresses for the
+branching instructions are contained in the immediate field, and are used to
+construct a word-aligned, PC-relative addresses. See also <<COD>> or the "green
+card" for implementation details.
 
 . Implement the `lw` and `sw` instructions. Remember to use the `GET_BIGWORD`
 and `SET_BIGWORD` macros for accessing the memory in `mem`.
 
-. Implement the `addiu`, `andi`, `ori`, and `slti` instructions. 
+. Implement the `addiu`, `andi`, `lui`, `ori`, and `slti` instructions. 
 
 ====
 
@@ -1465,8 +1469,8 @@ instruction.
 
 You can turn this off by adding the assembler directive `.set noreorder` at the
 top of your assembly files. Alternatively, you can implement a branch delay
-slot. For the single-cycle architecture, this will almost be a "hack" or
-"spoof". In G2, this will be a lot more elegant.
+slot. For the scope of this assignment, this will almost be a "hack" or "spoof".
+In G2, this will be a lot more elegant.
 
 == Submitting Your Solution
 
@@ -1492,7 +1496,7 @@ make in your report**.
 Use the `tar` command-line utility to package your code:
 
 ----
-~/ark$ tar cvf g1-code.tar.gz 1st
+~/ark$ tar cvzf g1-code.tar.gz 1st
 ----
 
 === Submit on Absalon
@@ -1519,8 +1523,7 @@ We are not far from the bare essentials necessary to run simple C code on our
 simulator. Getting this to work is a completely optional, supplementary
 exercise.
 
-Create a directory `~/ark/1st/c/`, similar to `~/ark/1st/asm/`, and consider a
-very simple C program:
+Consider a very simple C program:
 
 .~/ark/1st/c/universe.c
 ----
@@ -1608,7 +1611,6 @@ to a terminating `syscall` instruction:
 .~/ark/1st/c/_start.S
 ----
 .globl _start
-.text
 _start:
   jal main
   syscall
@@ -1651,20 +1653,20 @@ run `universe.elf` on our simulator:
 
 ----
 ~/ark/1st$ ./sim default.cfg c/universe.elf 
-Ran 9 instruction(s).
+Executed 10 instruction(s).
 pc = 0x400024
-at = 0x4a00ff
+at = 0x0
 v0 = 0x2a
 v1 = 0x0
 t0 = 0x0
 t1 = 0x0
 t2 = 0x0
 t3 = 0x0
-t4 = 0x2a
-t5 = 0x0
+t4 = 0x0
+t5 = 0x2a
 t6 = 0x0
 t7 = 0x0
-sp = 0x4a00ff
+sp = 0x4a00fc
 ra = 0x400020
 ----
 

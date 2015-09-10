@@ -32,16 +32,21 @@
 
 // MIPS32 instruction parsing
 
-#define OPCODE_R        (0x0)
-#define OPCODE_J        (0x2)
-#define OPCODE_JAL      (0x3)
-#define OPCODE_BEQ      (0x4)
-#define OPCODE_ADDIU    (0x9)
+#define OPCODE_R        (0x00)
+#define OPCODE_J        (0x02)
+#define OPCODE_JAL      (0x03)
+#define OPCODE_BEQ      (0x04)
+#define OPCODE_BNE      (0x05)
+#define OPCODE_ADDIU    (0x09)
+#define OPCODE_SLTI     (0x0A)
+#define OPCODE_ANDI     (0x0C)
+#define OPCODE_ORI      (0x0D)
+#define OPCODE_LUI      (0x0F)
 #define OPCODE_LW       (0x23)
-#define OPCODE_SW       (0x2b)
+#define OPCODE_SW       (0x2B)
 
-#define FUNCT_JR        (0x8)
-#define FUNCT_SYSCALL   (0xc)
+#define FUNCT_JR        (0x08)
+#define FUNCT_SYSCALL   (0x0C)
 #define FUNCT_ADDU      (0x21)
 #define FUNCT_SUBU      (0x23)
 #define FUNCT_AND       (0x24)
@@ -72,5 +77,6 @@
 #define GET_ADDRESS(inst)   ((inst) & LS_26B)
 
 #define SIGN_EXTEND(value)  ((int32_t)(int16_t)value)
+#define ZERO_EXTEND(value)  ((uint32_t)value)
 
 #endif // ARK2015_MIPS32_H
