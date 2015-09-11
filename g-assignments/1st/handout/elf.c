@@ -41,7 +41,7 @@ typedef uint32_t Elf32_Off;
 
 #define ET_EXEC   (2)
 
-FILE *fdesc;
+FILE *stream;
 
 struct elf_header {
   unsigned char e_ident[EI_NIDENT];
@@ -114,7 +114,7 @@ int read_elf_ident() {
   // It is straight-forward to read the ELF Identification. It is just an array
   // of 16 bytes. So there is no trouble with endianness; that comes later.
 
-  if (fread(&e_header.e_ident, sizeof(e_header.e_ident), 1, fdesc) != 1) {
+  if (fread(&e_header.e_ident, sizeof(e_header.e_ident), 1, stream) != 1) {
     error(0, errno, "couldn't read ELF Identification");
     return ELF_ERROR_IO_ERROR;
   }
@@ -136,7 +136,7 @@ int read_half_words(uint16_t *dst, size_t n) {
   size_t i;
 
   for (i = 0; i < n; ++i) {
-    if (fread(&buf, sizeof(buf), 1, fdesc) != 1) {
+    if (fread(&buf, sizeof(buf), 1, stream) != 1) {
       error(0, 0, "couldn't read ELF32 half word.");
       return ELF_ERROR_IO_ERROR;
     }
@@ -152,7 +152,7 @@ int read_words(uint32_t *dst, size_t n) {
   size_t i;
 
   for (i = 0; i < n; ++i) {
-    if (fread(&buf, sizeof(buf), 1, fdesc) != 1) {
+    if (fread(&buf, sizeof(buf), 1, stream) != 1) {
       error(0, 0, "couldn't read ELF32 word.");
       return ELF_ERROR_IO_ERROR;
     }
@@ -202,13 +202,13 @@ int read_type_and_machine() {
 int read_e_header() {
   int retval = 0;
 
-  retval = read_elf_ident(fdesc);
+  retval = read_elf_ident(stream);
   if (retval != 0) {
     error(0, 0, "couldn't read ELF ident array.");
     return retval;
   }
 
-  retval = read_type_and_machine(fdesc);
+  retval = read_type_and_machine(stream);
   if (retval != 0) {
     error(0, 0, "couldn't read ELF type and machine.");
     return retval;
@@ -230,7 +230,7 @@ int read_e_header() {
 }
 
 // Assumes first 6 words of p_header are set.
-// After this function, fdesc will point to one past the end of the segment.
+// After this function, stream will point to one past the end of the segment.
 int copy_segment(unsigned char *mem, size_t memsz) {
   uint32_t offset;
   unsigned char *segmem;
@@ -244,19 +244,19 @@ int copy_segment(unsigned char *mem, size_t memsz) {
   segmem = mem + offset;
   memset(segmem, 0, p_header.p_memsz);
 
-  if (fseek(fdesc, p_header.p_offset, SEEK_SET) != 0) {
+  if (fseek(stream, p_header.p_offset, SEEK_SET) != 0) {
     return ELF_ERROR_IO_ERROR;
   }
 
-  if (fread(segmem, p_header.p_filesz, 1, fdesc) != 1) {
+  if (fread(segmem, p_header.p_filesz, 1, stream) != 1) {
     return ELF_ERROR_IO_ERROR;
   }
 
   return 0;
 }
 
-// Assumes fdesc points to the first byte of a program header entry.
-// After this function, fdesc points to one past the end of the associated
+// Assumes stream points to the first byte of a program header entry.
+// After this function, stream points to one past the end of the associated
 // segment. Also, the first 6 words of the p_header will be set.
 int copy_cur_segment_aux(unsigned char *mem, size_t memsz) {
   int retval = 0;
@@ -285,13 +285,13 @@ int copy_cur_segment_aux(unsigned char *mem, size_t memsz) {
   return retval;
 }
 
-// After this function, fdesc points to one past the end of the current program
+// After this function, stream points to one past the end of the current program
 // header entry. Also, the first 6 words of the p_header will be set.
 int copy_cur_segment(unsigned char *mem, size_t memsz) {
   long origin;
   int retval;
 
-  origin = ftell(fdesc);
+  origin = ftell(stream);
   if (origin == -1) {
     error(0, errno, "couldn't tell current position in file");
     return ELF_ERROR_IO_ERROR;
@@ -299,8 +299,8 @@ int copy_cur_segment(unsigned char *mem, size_t memsz) {
 
   retval = copy_cur_segment_aux(mem, memsz);
 
-  // Restore fdesc to next program header entry (if any).
-  if (fseek(fdesc, origin + e_header.e_phentsize, SEEK_SET) != 0) {
+  // Restore stream to next program header entry (if any).
+  if (fseek(stream, origin + e_header.e_phentsize, SEEK_SET) != 0) {
     error(0, errno, "couldn't seek past program header entity");
     return ELF_ERROR_IO_ERROR;
   }
@@ -308,13 +308,13 @@ int copy_cur_segment(unsigned char *mem, size_t memsz) {
   return retval;
 }
 
-// After this function, fdesc point to one past the end of the last program
+// After this function, stream point to one past the end of the last program
 // header entry.
 int copy_all_segments(unsigned char *mem, size_t memsz) {
   size_t i;
   int retval = 0;
 
-  if (fseek(fdesc, e_header.e_phoff, SEEK_SET) != 0) {
+  if (fseek(stream, e_header.e_phoff, SEEK_SET) != 0) {
     error(0, errno, "couldn't seek to program header table");
     return ELF_ERROR_IO_ERROR;
   }
@@ -330,8 +330,8 @@ int copy_all_segments(unsigned char *mem, size_t memsz) {
 int elf_open(const char *path) {
   int retval = 0;
 
-  fdesc = fopen(path, "r");
-  if (fdesc == NULL) {
+  stream = fopen(path, "r");
+  if (stream == NULL) {
     error(0, errno, "couldn't open file (%s) for reading", path);
     return ELF_ERROR_IO_ERROR;
   }
@@ -346,7 +346,7 @@ int elf_open(const char *path) {
 }
 
 int elf_close() {
-  if (fclose(fdesc) != 0) {
+  if (fclose(stream) != 0) {
     error(0, errno, "couldn't close opened file");
     return ELF_ERROR_IO_ERROR;
   }
