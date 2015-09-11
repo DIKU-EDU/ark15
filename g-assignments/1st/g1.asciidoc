@@ -1365,8 +1365,8 @@ R-type instruction has the following format:
 [     opcode    ] [     rs     ] [     rt     ] [     rd     ] [ shamt  ] [  funct  ]
 ----
 
-Luckily for you, the macros `GET_RS`, `GET_RT`, `GET_RD`, `GET_FUNCT` and
-`GET_SHAMT` have already been defined in `mips32.h`, which extract the
+Luckily for you, the macros `GET_RS`, `GET_RT`, `GET_RD`, `GET_SHAMT` and
+`GET_FUNCT` have already been defined in `mips32.h`, which extract the
 corresponding fields from the 32-bit instruction using bitwise operations.
 
 Both signed and unsigned versions of some of the instructions are implemented
