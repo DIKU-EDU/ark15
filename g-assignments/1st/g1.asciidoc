@@ -1592,9 +1592,25 @@ Disassembly of section .text:
 ----
 
 From the look of the output above, all we need to support in our simulator are
-the `addiu`, `sw`, `lw`, `jr`, `nop`, and `addu` instructions. (`move` and `li`
-are pseudo-instructions, which in binary form correspond to `addu` and `addiu`,
-respectively.)
+the `addiu`, `sw`, `move`, `li`, `lw`, `jr`, and `nop` instructions, where that
+`move`, `li`, and `nop` are pseudoinstructions.
+
+[NOTE]
+.`li` pseudoinstruction
+====
+The `li` pseudoinstruction has 3 possible machine-code implementations,
+depending on the size of the constant written in the assembly:
+
+. For the interval [0..65,535], it turns into an `ori`.
+
+. For the interval [-32,767..0], it turns into `addiu`.
+
+. For all other constants, it turns into a `lui` followed by an `ori`
+  instruction.
+
+As long as you support `ori`, `addiu`, and `lui`, you support the `li`
+pseudoinstruction.
+====
 
 Let us briefly recap what this program does. First, it allocates 8 bytes of
 stack space, and uses 4 of those bytes to store the callee-saves frame pointer
