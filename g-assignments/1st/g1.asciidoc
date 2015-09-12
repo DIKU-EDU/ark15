@@ -1456,8 +1456,8 @@ and `SET_BIGWORD` macros for accessing the memory in `mem`.
 
 ==== Pseudo-instructions
 
-You already support the `move` and `nop` pseudo-instructions by supporting the
-instructions `or` and `sll`, respectively. *Mental exercise:* How come?
+You already support the `move` and `nop` pseudoinstructions by supporting the
+instructions `addu` and `sll`, respectively. *Mental exercise:* How come?
 
 ==== Branch Delay Slot
 
