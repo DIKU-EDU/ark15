@@ -83,13 +83,6 @@ additional parameters for the instruction.
 
 === Assembly and Linking
 
-////
-Symbols corresponding to labels can be defined within assembly code. These
-provide references to the memory addresses of places in the code. These
-references are used by branch and jump instructions, which correspond to
-conditionals such as if, and goto respectively.
-////
-
 An assembler assembles assembly code into an __object file__. An object file is
 not directly executable, but it begins with a header, providing information
 about the remaining contents of the file. The contents may include:
@@ -115,11 +108,6 @@ files. A linker produces a file that your operating system knows how to
 execute. As you might have guessed, for Linux, this is typically also the
 https://en.wikipedia.org/wiki/Executable_and_Linkable_Format[Executable and
 Linkable Format] (ELF).
-
-////
-Linking may include relocating code in memory, which requires
-information about which instructions depend upon absolute addresses.
-////
 
 Similar to an object file, an executable file begins with a header, and may
 contain, among other things, a text and data segment. The header provides
@@ -713,13 +701,6 @@ http://booksite.elsevier.com/9780124077263/downloads/COD_5e_Greencard.pdf[the
 
 === Converting Binary to Decimal
 
-////
-MIPS32 is a big-endian architecture, as opposed to the x86-64 architecture,
-which is little-endian. A big-endian architecture means that the most
-significant byte of a number is stored at the lowest memory address, or left to
-right from most to least significance in the above.
-////
-
 We can convert the bits making up each field of the instruction from binary to
 decimal. In __positional notation__, a number is a string of digits. The
 digits, numbered from right to left, starting at 0, signify the multiple of the
@@ -970,19 +951,6 @@ Disassembly of section .text:
 file and print the disassembly.
 
 ====
-
-////
-====
-
-**EXERCISE**
-
-01091020 is hexadecimal notation for the bit-sequence
-00000001000010010001000000100000 above.
-
-Verify this using `xxd`. (Hint: which argument should we omit to `xxd`?)
-
-====
-////
 
 === My First Executable
 
@@ -1274,48 +1242,6 @@ things are clear. We will look more at assembly code later.
 
 ====
 
-////
-=== Makefiles
-
-Often several steps are required in order to compile/assemble and link an
-executable, as above. It can be convenient to package these steps into a single
-terminal command.
-
-Make is a build system which runs the commands specified by targets. A target
-is specified with a name, and the first target is the default target.
-
-Create a file called `Makefile` in your directory for this assignment, and
-paste the following into it:
-
-.~/ark/Makefile
-----
-.PHONY: all clean
-
-SRC=$(patsubst %.S,%.elf,$(wildcard *.S))
-
-all: $(SRC)
-
-%.elf: %.S
-  mips-elf-as -mips32 -o $*.o --fatal-warnings $*.S
-  mips-elf-ld -o $*.elf $*.o
-
-clean:
-  rm -f *.o
-  rm -f *.elf
-----
-
-TODO: explain this Makefile better!!!
-
-Note that the indentation must be with tabs and not spaces. Once you have saved
-the file, you will be able to run the `make` command in the directory with the
-Makefile, and the default target (the first in the file) will be built, by
-running the three commands shown one after another, as you did manually before.
-`make clean` will delete the test binary files. The `.PHONY` target at the top
-of the file indicates that the targets `all` and `clean` do not produce files
-named `all` and `clean`.
-
-////
-
 == Optional: Roll Your Own Toolchains
 
 If you have a fresh http://antergos.com/[Antergos] or
@@ -1358,25 +1284,11 @@ password.
 
 ====
 
-////
- You will probably also need the package
-`texinfo` to complete the build process successfully.
-////
-
-
 === MIPS Cross-Architecture Toolchain
 
 To cross-compile to the MIPS ELF executable format, you will need to compile
 your own GNU Binutils and GNU Compiler Collection, parametrized to target MIPS
 ELF.
-
-////
-This requires a cross-architecture toolchain. The following lines are commands
-which should be entered into a terminal (your shell), as indicated by the `$`
-symbol. The path before the dollar sign indicates what the present working
-directory is; `~` is the user's home directory. The actual command to execute 
-is the part after the dollar sign.
-////
 
 If it doesn't already exist, create a directory `opt` in your home directory,
 and change directory to it, then make a subdirectory called `cross`:
@@ -1398,16 +1310,6 @@ documentation system.
 ----
 ~/opt$ wget http://ftp.gnu.org/gnu/binutils/binutils-2.25.tar.gz
 ----
-
-////
-Environment variables in the shell must be set to allow the build process to
-know where we are building to, which platform we are building for and where
-relevant executables lie:
-
-----
-~/opt$ export PATH="$PATH:$HOME/opt/cross"
-----
-////
 
 Unpack the binutils archive (`binutils-2.25.tar.gz`):
 
