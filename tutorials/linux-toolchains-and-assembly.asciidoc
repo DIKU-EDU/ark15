@@ -114,7 +114,7 @@ resolves internal references within an object file, and externally, to other
 files. A linker produces a file that your operating system knows how to
 execute. As you might have guessed, for Linux, this is typically also the
 https://en.wikipedia.org/wiki/Executable_and_Linkable_Format[Executable and
-Linkable Format], or ELF.
+Linkable Format] (ELF).
 
 ////
 Linking may include relocating code in memory, which requires

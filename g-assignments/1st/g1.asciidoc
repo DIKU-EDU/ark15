@@ -192,7 +192,7 @@ resolves internal references within an object file, and externally, to other
 files. A linker produces a file that your operating system knows how to
 execute. As you might have guessed, for Linux, this is typically also the
 https://en.wikipedia.org/wiki/Executable_and_Linkable_Format[Executable and
-Linkable Format], or ELF.
+Linkable Format] (ELF).
 
 Similar to an object file, an executable file begins with a header, and may
 contain, among other things, a text and data segment. The header provides
@@ -1529,7 +1529,7 @@ are pseudo-instructions, which in binary form correspond to `addu` and `addiu`,
 respectively.)
 
 Let us briefly recap what this program does. First, it allocates 8 bytes of
-stack space, and uses 4 of those bytes to store the callee-saves frame pointer
+stack space, and uses 4 of those bytes to store the callee-saved frame pointer
 (`s8` is a synonym for `fp`). It then sets the stack pointer as the new frame
 pointer. This frame is never used, but it is set up. The program then stores
 the value `42` in register `v0`, clears the frame and returns to `ra`.
@@ -1580,8 +1580,8 @@ Disassembly of section .text:
 It will be convenient to package these observations into the `Makefile` for the
 `~/ark/1st/c/` directory, just as we did for `~/ark/1st/asm/`.
 
-The `universe.elf` is no special ELF file, so it should be straightforward to
-run `universe.elf` on our simulator:
+`universe.elf` is no special ELF file, so it should be straightforward to run it on
+our simulator:
 
 ----
 ~/ark/1st$ ./sim default.cfg c/universe.elf 
