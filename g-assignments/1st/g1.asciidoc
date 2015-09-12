@@ -1395,7 +1395,7 @@ and `SET_BIGWORD` macros for accessing the memory in `mem`.
 
 ====
 
-==== Pseudo-instructions
+==== Pseudoinstructions
 
 You already support the `move` and `nop` pseudoinstructions by supporting the
 instructions `addu` and `sll`, respectively. *Mental exercise:* How come?
