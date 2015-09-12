@@ -1580,8 +1580,8 @@ Disassembly of section .text:
 It will be convenient to package these observations into the `Makefile` for the
 `~/ark/1st/c/` directory, just as we did for `~/ark/1st/asm/`.
 
-`universe.elf` is no special ELF file, so it should be straightforward to run it on
-our simulator:
+`universe.elf` is no special ELF file, so it should be straightforward to run
+it on our simulator:
 
 ----
 ~/ark/1st$ ./sim default.cfg c/universe.elf 
