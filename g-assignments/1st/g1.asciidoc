@@ -30,30 +30,6 @@ repository at https://github.com/onlineta/ark15.
 [.lead]
 Happy hacking :-)
 
-////
-The intent of this G-assignment is to gain hands-on experience with basic C
-programming, and to have a go at simulating MIPS32 instructions.
-
-You will learn to:
-
-* assemble basic MIPS32 assembly into machine code;
-* read and interpret MIPS32 machine code in C; and
-* simulate a simple, single-core MIPS32 processor.
-
-The C-skills you will practice can perhaps be summarised as follows:
-
-* writing, compiling, and executing programs written in C;
-* simple preprocessor macros in C;
-* conditionals and switch statements;
-* basic arrays and pointers to simple types; as well as
-* logical, binary, and arithmetic operators in C.
-
-The simulator we consider here is very basic. In popular nomenclature, we
-simulate a MIPS32 processor which does not perform pipelined, or speculative
-execution, has no caches, and has only one processor core. Many of these
-topics, and more, will be explored in excruciating detail in G2 and G3.
-////
-
 == Assignment
 
 This is a short overview of your assignment. Flip back to this if you are ever
@@ -192,13 +168,6 @@ additional parameters for the instruction.
 
 === Assembly and Linking
 
-////
-Symbols corresponding to labels can be defined within assembly code. These
-provide references to the memory addresses of places in the code. These
-references are used by branch and jump instructions, which correspond to
-conditionals such as if, and goto respectively.
-////
-
 An assembler assembles assembly code into an __object file__. An object file is
 not directly executable, but it begins with a header, providing information
 about the remaining contents of the file. The contents may include:
@@ -223,12 +192,7 @@ resolves internal references within an object file, and externally, to other
 files. A linker produces a file that your operating system knows how to
 execute. As you might have guessed, for Linux, this is typically also the
 https://en.wikipedia.org/wiki/Executable_and_Linkable_Format[Executable and
-Linkable Format], or ELF.
-
-////
-Linking may include relocating code in memory, which requires
-information about which instructions depend upon absolute addresses.
-////
+Linkable Format] (ELF).
 
 Similar to an object file, an executable file begins with a header, and may
 contain, among other things, a text and data segment. The header provides
@@ -1308,29 +1272,6 @@ in `mips32.h`. See below for details on how to handle R-type instructions.
 
 ====
 
-////
-*Exercise:* In `interp`, use (left) bitshifts (`<<`) and the logical OR
-(`|`) operations to reconstruct the instruction as a 32 bit unsigned integer
-from the four bytes at the positions noted above. You will want to save the
-result as an unsigned 32 bit integer, type `uint32_t`, which is defined in a
-library `stdint.h`. A preprocessor macro has been provided for the
-lazy/impatient. 
-
-====
-
-**EXERCISE**
-
-Write a function stub `interp_instr`, which takes as argument the
-`uint32_t` instruction, and which is called by `interp`. Use a `while` loop
-to iterate over the instructions, calling `interp_instr` with a reconstructed
-instruction before incrementing the `pc` by 4 up to `instr_mem_size`. As the
-`pc` is a global variable, the incremented value will be read by
-`interp_instr`. `interp` should return the value returned by `interp_instr` if
-it is non-zero, otherwise it should return 0 once all instructions have been
-processed.
-====
-////
-
 The opcode of an instruction is located in its 6 most significant bits. A macro,
 `GET_OPCODE` has been defined in `mips.h` to extract these bits for you. The code
 `GET_OPCODE(inst)` returns the opcode of the instruction `inst`.
@@ -1508,15 +1449,6 @@ Submit *two files* on Absalon:
 
 Remember to *mark your team members* on Absalon.
 
-////
-
-*Exercise:* Write a test for your simulator. In a text file, argue for why your
-test is sufficient. You may wish to use the the preprocessor directives
-`#ifdef` and `#endif` to e.g. `printf` the operation and operands if the symbol
-`DEBUG` is `#define` d.
-
-////
-
 == Optional: Interpreting C
 
 We are not far from the bare essentials necessary to run simple C code on our
@@ -1613,7 +1545,7 @@ pseudoinstruction.
 ====
 
 Let us briefly recap what this program does. First, it allocates 8 bytes of
-stack space, and uses 4 of those bytes to store the callee-saves frame pointer
+stack space, and uses 4 of those bytes to store the callee-saved frame pointer
 (`s8` is a synonym for `fp`). It then sets the stack pointer as the new frame
 pointer. This frame is never used, but it is set up. The program then stores
 the value `42` in register `v0`, clears the frame and returns to `ra`.
@@ -1664,8 +1596,8 @@ Disassembly of section .text:
 It will be convenient to package these observations into the `Makefile` for the
 `~/ark/1st/c/` directory, just as we did for `~/ark/1st/asm/`.
 
-The `universe.elf` is no special ELF file, so it should be straightforward to
-run `universe.elf` on our simulator:
+`universe.elf` is no special ELF file, so it should be straightforward to run
+it on our simulator:
 
 ----
 ~/ark/1st$ ./sim default.cfg c/universe.elf 
