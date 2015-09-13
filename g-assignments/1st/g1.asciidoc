@@ -786,10 +786,10 @@ library, under the `stdint.h` header.
 
 ***EXERCISE***
 
-Include `stdint.h` at the top of your `sim.c`. Define a static `uint32_t`
-called `PC`, and declare a static array `regs` for the general-purpose
-registers. You might find it useful to `#define` macros like `AT`, `V0`, `V1`,
-`SP`, `RA`, etc. standing in for the respective elements of the `regs` array.
+Include `stdint.h` at the top of your `sim.c`. Declare a static `uint32_t`
+called `PC`, and a static array `regs` for the general-purpose registers. You
+might find it useful to `#define` macros like `AT`, `V0`, `V1`, `SP`, `RA`,
+etc. standing in for the respective elements of the `regs` array.
 
 ====
 
@@ -983,7 +983,7 @@ type, but C programmers canonically use the byte-sized `unsigned char`.
 **EXERCISE**
 
 Declare a static `unsigned char` array `mem` at the top of `sim.c` of size
-640KB. For now, this will be our memory component. Declare a macro `MEMSZ`
+640KB. For now, this will be our memory component. Define a macro `MEMSZ`
 which holds the static size of `mem`.
 
 ====
