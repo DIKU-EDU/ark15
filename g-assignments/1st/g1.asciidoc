@@ -1,6 +1,6 @@
 = G1: Interpreting Instructions — Simulating Machines
 Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Major Contributors
-v1.2, September 12, 2015
+v1.2, September 13, 2015
 :doctype: article
 :backend: html5
 :docinfo:
@@ -787,7 +787,7 @@ library, under the `stdint.h` header.
 ***EXERCISE***
 
 Include `stdint.h` at the top of your `sim.c`. Define a static `uint32_t`
-called `PC`, and define a static array `regs` for the general-purpose
+called `PC`, and declare a static array `regs` for the general-purpose
 registers. You might find it useful to `#define` macros like `AT`, `V0`, `V1`,
 `SP`, `RA`, etc. standing in for the respective elements of the `regs` array.
 
