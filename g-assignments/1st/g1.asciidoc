@@ -1593,9 +1593,6 @@ Disassembly of section .text:
   400044: 00000000  nop
 ----
 
-It will be convenient to package these observations into the `Makefile` for the
-`~/ark/1st/c/` directory, just as we did for `~/ark/1st/asm/`.
-
 `universe.elf` is no special ELF file, so it should be straightforward to run
 it on our simulator:
 
