@@ -706,14 +706,15 @@ arguments is 3.  The first argument will always be the name of the executable
 the example above, the three arguments will be `"./sim"`, `"default.cfg"`, and
 `"asm/addu.elf"` (in that order).
 
-If there are three arguments as expected, then call a function called
-`read_config`, which takes one parameter, namely the second argument
-(`argv[1]`).  Otherwise, print a
+If there are not three arguments as expected, print a 
 https://en.wikipedia.org/wiki/Usage_message[usage message] informing the user
 how the program is intended to be used, and return `ERROR_INVALID_ARGS`. Use
 the `#define` to define `ERROR_INVALID_ARGS` at the top of your `sim.c`.
-`read_config` should return an integer; return this value from `main`, whenever
-you get this far.
+
+Otherwise, call a function called `read_config`, which takes one parameter,
+namely the second argument (`argv[1]`), and returns an integer. If the return
+value from `read_config` is non-zero, assume that an error has occured, and
+return this value from `main`.
 
 In order to compile this, you will need to define a function stub for
 `read_config`, which does nothing, prior to the declaration of `main`:
