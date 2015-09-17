@@ -41,9 +41,9 @@ typedef uint32_t Elf32_Off;
 
 #define ET_EXEC   (2)
 
-FILE *stream;
+static FILE *stream;
 
-struct elf_header {
+static struct elf_header {
   unsigned char e_ident[EI_NIDENT];
   Elf32_Half    e_type;
   Elf32_Half    e_machine;
@@ -66,7 +66,7 @@ struct elf_header {
 
 #define PT_MIPS_ABIFLAGS  (0x70000003)
 
-struct prog_header {
+static struct prog_header {
   Elf32_Word    p_type;
   Elf32_Off     p_offset;
   Elf32_Addr    p_vaddr;
