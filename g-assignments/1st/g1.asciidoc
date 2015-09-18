@@ -1357,7 +1357,7 @@ incremented Program Counter (`PC`). This is called "pseudodirect addressing"
 **EXERCISE**
 
 Implement the `j` and `jal` instructions in their own functions, called from
-`interp`. The macros `GET_ADDRESS` and `MS_4B` has been defined for you in
+`interp_inst`. The macros `GET_ADDRESS` and `MS_4B` has been defined for you in
 `mips32.h`.
 
 ====
