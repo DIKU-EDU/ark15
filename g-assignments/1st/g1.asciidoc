@@ -1348,9 +1348,9 @@ The J-type instructions have the format:
 
 The address field of a J-type instruction is 26 bits long. As instructions are
 word aligned, we left-shift the address field by 2, to provide a word-aligned
-address. The (remaining) upper 4 bits are taken from the upper 4 bits of the
-incremented Program Counter (`PC`). This is called "pseudodirect addressing"
-(see also <<COD>>).
+28 bit address. The (remaining) upper 4 bits are taken from the upper 4 bits of
+the incremented Program Counter (`PC`), yielding a "pseudodirect address" (see
+<<COD>> page 117, figure 2.18, as well as the "green card").
 
 ====
 
@@ -1386,8 +1386,8 @@ extract the immediate field (the 16 bit constant), you can use one of the
 
 . Implement the `beq` and `bne` instructions. Note, that the addresses for the
 branching instructions are contained in the immediate field, and are used to
-construct a word-aligned, PC-relative addresses. See also <<COD>> or the "green
-card" for implementation details.
+construct a word-aligned, PC-relative addresses. See page 64 and 117 in <<COD>>
+as well as the "green card" for impementation details.
 
 . Implement the `lw` and `sw` instructions. Remember to use the `GET_BIGWORD`
 and `SET_BIGWORD` macros for accessing the memory in `mem`.
