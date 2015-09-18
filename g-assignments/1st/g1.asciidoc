@@ -1,6 +1,6 @@
 = G1: Interpreting Instructions — Simulating Machines
 Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Major Contributors
-v1.2, September 17, 2015
+v1.2, September 18, 2015
 :doctype: article
 :backend: html5
 :docinfo:
@@ -947,7 +947,7 @@ automated testing.
 For the `default.cfg` given above, this should result in the following output:
 
 ----
-Executed 1 instruction(s).
+Executed 0 instruction(s).
 pc = 0x0
 at = 0x0
 v0 = 0x0
