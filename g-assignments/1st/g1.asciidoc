@@ -1,6 +1,6 @@
 = G1: Interpreting Instructions — Simulating Machines
 Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Major Contributors
-v1.2, September 18, 2015
+v1.3, September 18, 2015
 :doctype: article
 :backend: html5
 :docinfo:
