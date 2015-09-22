@@ -26,4 +26,6 @@ course progresses.
 
 . link:g-assignments/1st/g1.asciidoc[Interpreting Instructions — Simulating Machines]
 
+. link:g-assignments/2nd/g2.asciidoc[Pipelined Execution]
+
 (More coming soon.)
