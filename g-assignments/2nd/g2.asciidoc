@@ -275,8 +275,8 @@ second:
 Download and unpack the handout archive (`g2-handout-v1.0.tar.gz`) from
 Absalon. Replace the files in `~/ark/2nd/asm` with the `asm/*` files from the
 handout, and overwrite `~/ark/2nd/mips32.h` with the new version of `mips32.h`.
-Your old assembly files, are likely _not_ to work with this assignment, before
-you are completely done with this assignment.
+Your old assembly files are likely to _not_ work with the pipelined simulator,
+until you are completely done with the assignment.
 
 ====
 
