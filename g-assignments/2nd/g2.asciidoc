@@ -1201,14 +1201,14 @@ implemented an *assume branch not taken* branch-prediction strategy. This means
 that if we _do_ have to branch, some of the pipeline stages will have to drop
 what they were doing. This is called _flushing the pipeline_.
 
-At the same time, modern MIPS processors implement a branch-delay slot: The
+At the same time, modern MIPS processors implement a branch delay slot: The
 instruction immediately following a branch instruction is always executed.
 Modern MIPS processors detect and perform branching in the ID stage, avoiding
 flushing altogether.
 
 We detect whether we need to branch after the EX stage, meaning that the IF/ID
 and ID/EX pipeline registers need to be flushed. However, when implementing a
-branch-delay slot, we _only_ need to flush the IF/ID register.
+branch delay slot, we _only_ need to flush the IF/ID register.
 
 Flushing a pipeline stage means turning its operation into a `nop`.
 
@@ -1310,7 +1310,7 @@ detection?
 ====
 
 Since we jump after the end of the ID stage and do not flush the IF/ID pipeline
-register, our jumps implement a branch-delay slot.
+register, our jumps implement a branch delay slot.
 
 ====
 
