@@ -192,16 +192,6 @@ depend on the results of preceding instructions, which have not finished
 executing yet. Forwarding data and stalling the pipeline are just some of
 the ways such hazards are resolved.
 
-////
-=== Structure of the MIPS Pipeline
-
-Each stage of the pipeline takes inputs from the previous stage of the pipeline
-(or the instruction memory) and produces outputs for the next stage of the
-pipeline (or writes the result to a register). Non-programmer accessible
-__pipeline registers__ are used between the stages to save these intermediate
-results. 
-////
-
 == Rewriting Your Simulator
 
 Firstly, we need to conceptually split the execution of an instruction into the
@@ -220,11 +210,6 @@ of these five functions (in that order), constitutes a clock cycle.
 
 **Mental exercise:** Why shouldn't we execute the stage functions in order from
 start to end?
-
-////
-(Hint: How many pipeline stages would an instruction pass through in a clock
-cycle if we did it the other way around?)
-////
 
 ====
 
