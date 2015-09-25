@@ -367,8 +367,8 @@ fault happens on line 126, which (in this case) is part of `interp_mem`.
 
 Your program has not finished running. For GDB, a segmentation fault is like a
 breakpoint. You can ask GDB for the value of different local or global
-variables at this point. For instance, what is the value of `ex_mem.alu_res` in
-hex?
+variables at this point. For instance, what is the value of `ex_mem.alu_res`, in
+hexadecimal notation?
 
 ----
 (gdb) print/x ex_mem.alu_res
@@ -376,7 +376,7 @@ $1 = 0xfffffffc
 (gdb) 
 ----
 
-Or, what is that value in binary?
+Or how does it look in binary notation?
 
 ----
 (gdb) print/t ex_mem.alu_res
@@ -1411,7 +1411,7 @@ Define a function stub `forward()`, and call it at the end of `cycle`.
 
 ==== EX hazards
 
-The first data hazard is that the data we need for the EX stage in the
+The first data hazard occurs when the data we need for the EX stage in the
 following clock cycle has only just passed the EX stage. This is called an __EX
 hazard__. See also the pseudo-code on p. 308 in <<COD5e>>.
 
@@ -1422,8 +1422,8 @@ hazard__. See also the pseudo-code on p. 308 in <<COD5e>>.
 . Add a field `rs` to `id_ex` and set it appropriately in `interp_id`.
 
 . In `forward`, if `ex_mem.reg_write` is set, and the EX/MEM destination
-register is equal to either `id_ex.rs` or `id_ex.rt`, then forward ALU result
-to the appropriate field(s) in ID/EX.
+register is equal to either `id_ex.rs` or `id_ex.rt`, then forward the ALU
+result to the appropriate field(s) in ID/EX.
 
 You may need to forward both to `id_ex.rs_value` and `id_ex.rt_value`. You
 should not forward if the EX/MEM destination register is register 0.
@@ -1469,7 +1469,7 @@ on p. 311 in <<COD5e>>.
 . You will need to handle another case in addition to those discussed in
 <<COD5e>>. A `jal` instruction might be on it's way to the WB stage, when we
 hit a `jr` instruction in the ID stage. In this case, the `mem_wb.alu_res`
-should be forwarded to `id_ex.jump_target` instead `id_ex.rs_value`.
+should be forwarded to `id_ex.jump_target` instead of `id_ex.rs_value`.
 
 . Similarly, for `id_ex.rt`.
 
@@ -1614,7 +1614,7 @@ _start:
 
 **TESTING EXERCISE**
 
-Test that your simulator works with the good old `universe.c`.
+Test that your simulator works with good old `universe.c`.
 
 ====
 
