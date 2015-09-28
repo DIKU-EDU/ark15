@@ -3,6 +3,7 @@ Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Maj
 v1.1, September 28, 2015
 :doctype: article
 :backend: html5
+:pdf-page-size: A4
 :docinfo:
 :sectanchors:
 :sectnums:
