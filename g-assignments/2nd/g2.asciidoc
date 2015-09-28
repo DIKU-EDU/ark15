@@ -1,6 +1,6 @@
 = G2: Pipelined Execution
 Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Major Contributors
-v1.0, September 22, 2015
+v1.1, September 28, 2015
 :doctype: article
 :backend: html5
 :docinfo:
