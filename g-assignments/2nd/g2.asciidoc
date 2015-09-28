@@ -762,8 +762,13 @@ return 0.
 **TESTING EXERCISE**
 
 Check that `interp_if` and `interp_id` work as intended with the provided
-`sw-lw.S`. Print the values of the fields in the IF/ID and ID/EX pipeline
-registers at the end of every clock cycle. See `show_status` from
+`sw-lw.S`. Note, you don't support R-type instructions _yet_. `sw-lw.S` has a
+`syscall` instruction. The "intended" behaviour (for now) is that your
+simulator fails and complains about an unknown opcode.
+
+You might find it useful (to debugging and understanding) to print the values
+of the fields in the IF/ID and ID/EX pipeline registers at the end of every
+clock cycle. See `show_status` from
 https://github.com/onlineta/ark15/blob/master/g-assignments/1st/g1.asciidoc[G1]
 for inspiration. You might want to comment out parts of `show_status` if you
 choose to use it.
