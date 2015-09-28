@@ -298,8 +298,8 @@ loop. We will count up `instr_cnt` elsewhere.
 
 There was a mistake in the
 https://github.com/onlineta/ark15/blob/master/g-assignments/1st/g1.asciidoc[G1]
-assignment text. The original text said that `SP` should be initialized to the
-4th last byte of `mem`. This is not correct.
+assignment text. The original text said that `SP` should be initialized to
+poin to the 4th last byte in `mem`. This is not correct.
 
 MIPS convention has it, that `SP` denotes the most recently used (data) memory
 address. None of the data memory is initially in use, so `SP` should initially
@@ -783,7 +783,7 @@ Check that `interp_if` and `interp_id` work as intended with the provided
 `syscall` instruction. For now, the intended behaviour is that your simulator
 fails and complains about an unknown opcode.
 
-You _might_ find it useful (to debugging and understanding) to print the values
+You _might_ find it useful (for debugging and understanding) to print the values
 of the fields in the IF/ID and ID/EX pipeline registers at the end of every
 clock cycle. See `show_status` from
 https://github.com/onlineta/ark15/blob/master/g-assignments/1st/g1.asciidoc[G1]
