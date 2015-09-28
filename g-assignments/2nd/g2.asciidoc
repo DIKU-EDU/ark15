@@ -294,6 +294,23 @@ loop. We will count up `instr_cnt` elsewhere.
 
 ====
 
+**CORRECTING EXERCISE**
+
+There was a mistake in the
+https://github.com/onlineta/ark15/blob/master/g-assignments/1st/g1.asciidoc[G1]
+assignment text. The original text said that `SP` should be initialized to the
+4th last byte of `mem`. This is not correct.
+
+MIPS convention has it, that `SP` denotes the most recently used (data) memory
+address. None of the data memory is initially in use, so `SP` should initially
+be set to the 1st byte past `mem` (the stack grows downwards).
+
+Correct this in your implementation.
+
+====
+
+====
+
 **TESTING EXERCISE**
 
 For any valid configuration and ELF file, your (broken) simulator should exit
