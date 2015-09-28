@@ -133,7 +133,6 @@ the execution of all 5 stages in a clock cycle:
 image::no-pipeline.png[]
 
 ////
-
 asciidoctor sucks..
 
 ----
@@ -144,7 +143,6 @@ asciidoctor sucks..
                               | IF  | ID  | EX  | MEM | WB  |
                                                             | IF  | ID  | EX  | MEM | WB  |
 ----
-
 ////
 
 In a pipelined architecture, all stages execute simultaneously in every clock
@@ -155,7 +153,6 @@ clock cycle:
 image::with-pipeline.png[]
 
 ////
-
 asciidoctor sucks..
 
 ----
