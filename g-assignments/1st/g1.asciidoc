@@ -1,6 +1,6 @@
 = G1: Interpreting Instructions — Simulating Machines
 Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Major Contributors
-v1.3, September 18, 2015
+v1.3, September 28, 2015
 :doctype: article
 :backend: html5
 :docinfo:
@@ -1162,9 +1162,11 @@ before dealing with the memory component. For instance, we can use
 **EXERCISE**
 
 After successfully initializing registers and memory in `main`, set the `SP`
-(stack pointer register) to point to the top of the stack. This is the 4th last
-byte in `mem`. As with any other memory address, the stack pointer should be
-offset by `MIPS_RESERVE` (`0x400000`, defined in `mips32.h`).
+(stack pointer register) to point to the top of the stack. MIPS convention has
+it, that `SP` is value denoting the most recently used (data) memory address.
+None of the data memory has been used yet, so this is the 1st byte past `mem`.
+As with any other memory address, the stack pointer should be offset by
+`MIPS_RESERVE` (`0x400000`, defined in `mips32.h`).
 
 ====
 
