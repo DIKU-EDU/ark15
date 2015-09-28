@@ -138,7 +138,7 @@ asciidoctor sucks..
 
 ----
 +-----------------------------+-----------------------------+-----------------------------+
-|            800ms            |             800ms           |             800ms           |
+|            800ps            |             800ps           |             800ps           |
 +-----------------------------+-----------------------------+-----------------------------+
 | IF  | ID  | EX  | MEM | WB  |
                               | IF  | ID  | EX  | MEM | WB  |
@@ -160,7 +160,7 @@ asciidoctor sucks..
 
 ----
 +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
-|200ms|200ms|200ms|200ms|200ms|200ms|200ms|200ms|200ms|200ms|200ms|200ms|200ms|200ms|200ms|
+|200ps|200ps|200ps|200ps|200ps|200ps|200ps|200ps|200ps|200ps|200ps|200ps|200ps|200ps|200ps|
 +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
 | IF  | ID  | EX  | MEM | WB  |
       | IF  | ID  | EX  | MEM | WB  |
@@ -184,7 +184,7 @@ Pipelining increases instruction __throughput__: pipeline start-up overhead
 aside, the number of clock cycles is roughly equal to the number of
 instructions. With a shorter clock cycle duration, more instructions get
 executed in the same wall-clock time-frame. In the example above, the
-single-cycle architecture only made it through 3 instructions in 2400ms, while
+single-cycle architecture only made it through 3 instructions in 2400ps, while
 the pipelined architecture made it through 11 instructions.
 
 This exploitation of __parallelism__ in a sequential instruction stream creates
