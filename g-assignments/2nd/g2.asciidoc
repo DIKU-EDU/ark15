@@ -1,6 +1,6 @@
 = G2: Pipelined Execution
 Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Major Contributors
-v1.1, September 28, 2015
+v1.2, October 2, 2015
 :doctype: article
 :backend: html5
 :pdf-page-size: A4
@@ -1397,7 +1397,7 @@ In `alu`, handle the case for `FUNCT_JR`. (Do nothing. You just handled
 **TESTING EXERCISE**
 
 Check that your implementation `jr` works as intended with the provided
-`jal-j-jr-nopsled.S`. You will need working implementations of `jal` and `j`.
+`jal-jr-j-nopsled.S`. You will need working implementations of `jal` and `j`.
 
 Check that your interpreter _still_ works as intended with `sw-lw.S`, `add.S`,
 `beq-true-nopsled.S`, `beq-false-nopsled.S`, `j-nopsled.S`, `jal-nopsled.S`.
@@ -1553,7 +1553,7 @@ Check that your interpreter _still_ works as intended with all the
 **TESTING EXERCISE**
 
 Check that your implementation works as intended with the provided `sw-lw.S`,
-`add.S`, `beq-true.S`, `beq-false.S`, `j.S`, `jal.S`, `jal-j-jr.S`.
+`add.S`, `beq-true.S`, `beq-false.S`, `j.S`, `jal.S`, `jal-jr-j.S`.
 
 Check that your interpreter _still_ works as intended with all the
 `*-nopsled.S` files.
