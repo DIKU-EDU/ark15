@@ -1485,12 +1485,12 @@ ALU result or the data read from memory to `id_ex.rs_value`. (Check the
 `mem_wb.mem_to_reg` flag.) If this sounds confusing, see also the pseudo-code
 on p. 311 in <<COD5e>>.
 
+. Similarly, for `id_ex.rt`.
+
 . You will need to handle another case in addition to those discussed in
 <<COD5e>>. A `jal` instruction might be on it's way to the WB stage, when we
 hit a `jr` instruction in the ID stage. In this case, the `mem_wb.alu_res`
 should be forwarded to `id_ex.jump_target` instead of `id_ex.rs_value`.
-
-. Similarly, for `id_ex.rt`.
 
 . Make sure to still handle EX hazards as before.
 
