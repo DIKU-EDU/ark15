@@ -1,6 +1,6 @@
 = G2: Pipelined Execution
 Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Major Contributors
-v1.2, October 2, 2015
+v1.2, October 6, 2015
 :doctype: article
 :backend: html5
 :pdf-page-size: A4
@@ -376,8 +376,8 @@ This is the GDB prompt where you can enter GDB commands. One GDB command you
 can enter is to run the program with some chosen set of arguments:
 
 ----
-(gdb) run default.cfg asm/sw-lw.elf
-Starting program: /home/archimedes/ark/2nd/sim default.cfg asm/sw-lw.elf
+(gdb) run default.cfg asm/sw-lw-unknown-opcode.elf
+Starting program: /home/archimedes/ark/2nd/sim default.cfg asm/sw-lw-unknown-opcode.elf
 
 Program received signal SIGSEGV, Segmentation fault.
 0x000000000040145f in interp_mem () at sim.c:126
@@ -449,8 +449,8 @@ Breakpoint 2 at 0x4019e4: file sim.c, line 319.
 After you have set your breakpoints, run the program:
 
 ----
-(gdb) run default.cfg asm/sw-lw.elf
-Starting program: /home/archimedes/2nd/sim default.cfg asm/sw-lw.elf
+(gdb) run default.cfg asm/sw-lw-unknown-opcode.elf
+Starting program: /home/archimedes/2nd/sim default.cfg asm/sw-lw-unknown-opcode.elf
 
 Breakpoint 1, cycle () at sim.c:560
 560   int retval = 0;
@@ -500,7 +500,7 @@ something like this `gdb.script` file might be useful:
 .gdb.script
 ----
 break cycle
-run default.cfg asm/sw-lw.elf
+run default.cfg asm/sw-lw-unknown-opcode.elf
 continue
 print/x if_id
 ----
@@ -787,9 +787,10 @@ return 0.
 **TESTING EXERCISE**
 
 Check that `interp_if` and `interp_id` work as intended with the provided
-`sw-lw.S`. Note, you don't support R-type instructions _yet_. `sw-lw.S` has a
-`syscall` instruction. For now, the intended behaviour is that your simulator
-fails and complains about an unknown opcode.
+`sw-lw-unknown-opcode.S`. Note, you don't support R-type instructions
+_yet_. `sw-lw-unknown-opcode.S` has a `syscall` instruction. For now, the
+intended behaviour is that your simulator fails and complains about an
+unknown opcode.
 
 ====
 
@@ -879,7 +880,7 @@ of `interp_ex`. Make sure to check the return value in `cycle`.
 **TESTING EXERCISE**
 
 Check that `interp_if`, `interp_id`, and `interp_ex` work as intended with the
-provided `sw-lw.S`.
+provided `sw-lw-syscall.S`.
 
 ====
 
@@ -928,7 +929,7 @@ in `ex_mem.rt_value` to `mem` at the address stored in `ex_mem.alu_res`.
 **TESTING EXERCISE**
 
 Check that `interp_if`, `interp_id`, `interp_ex`, and `interp_mem` work as
-intended with the provided `sw-lw.S`.
+intended with the provided `sw-lw-syscall.S`.
 
 ====
 
@@ -939,13 +940,13 @@ Write Back, or WB, is the fifth and final stage of the pipeline.
 In the WB stage, results from the previous stages are finally written back to
 the register file.
 
-If you have followed along in the optional exercises, and taken a look at the
-handed out `sw-lw.S`, you might have noticed that each `sw` and `lw`
-instruction was followed by 4 `nop` instructions. This was done to allow the
-`sw` and `lw` instructions to reach the WB stage before an instruction that
-depends on their result enter the ID stage. We will fix this later by
-optionally forwarding data to the earlier stages in the pipeline, but first,
-let's finish the WB stage.
+If you have followed along in the testing exercises, and taken a look at
+the handed out `sw-lw-unknown-opcode.S`, or `sw-lw-syscall.S` you might
+have noticed that the (non-conflicting) `sw` and `lw` instructions are
+followed by 1 or 2 `nop` instructions. This is done to allow the `lw`
+instruction to reach the WB stage before the `syscall` instruction enters
+the EX or ID stage, respectively. It is now time to implement the WB stage
+itself.
 
 ====
 
