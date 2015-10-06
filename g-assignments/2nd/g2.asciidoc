@@ -1301,7 +1301,7 @@ jumps!).
 .. Set `mem_read`, `mem_write`, `reg_write`, `branch`, and `jump` control bits
 appropriately.
 
-.. Use `GET_ADDR` to get the address field of `if_id.inst`.
+.. Use `GET_ADDRESS` to get the address field of `if_id.inst`.
 
 .. Use the address field and `if_id.next_pc` to set the `id_ex.jump_target`
 field. Recall that jumps use pseudodirect addressing. See also
