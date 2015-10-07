@@ -1,0 +1,818 @@
+= G3: Caching (Optional)
+Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Major Contributors
+v1.0, October 7, 2015
+:doctype: article
+:backend: html5
+:pdf-page-size: A4
+:docinfo:
+:sectanchors:
+:sectnums:
+:toc:
+
+This is the last in a series of three G-assignments ("G" for "Godkendelse"
+and/or "Gruppeopgave") which you must pass in order to be eligible for the
+exam in the course http://www.webcitation.org/6a2I3GpLv[Machine
+Architecture (ARK)] at http://www.diku.dk[DIKU]. We encourage
+https://en.wikipedia.org/wiki/Pair_programming[pair programming], so please
+form groups of 2-3 students.
+
+[.lead]
+If you have any comments or corrections, let us know offline, or visit our
+public GitHub repository at https://github.com/onlineta/ark15.
+
+== Assignment
+
+It's been a long and trecherous path towards G3. To make your time more
+manageable, we decided to make the vast majority of this assignment
+*optional, but highly recommended*.
+
+*The mandatory part of your assignment is to finish off the optional parts
+of G2, and fix the problems in your solutions for
+https://github.com/onlineta/ark15/blob/master/g-assignments/1st/g1.asciidoc[G1]
+and
+https://github.com/onlineta/ark15/blob/master/g-assignments/2nd/g2.asciidoc[G2].
+The rest of this assignment, G3, as such, is for your further study, only.*
+
+You should submit a pipelined simulator, which adequately handles MEM, EX,
+and lw/use hazards. The simulator should support the following
+instructions: `addu`, `addiu`, `and`, `andi`, `beq`, `bne`, `j`, `jal`,
+`jr`, `lw`, `lui`, `nor`, `or`, `ori`, `sll`, `slt`, `sltu`, `slti`,
+`sltiu`, `srl`, `subu`, `sw`, and of course, halt on a `syscall`
+instruction.
+
+You can also submit a pipelined simulator (as above) which also models a
+2-level cache hierarchy, with a separate instruction- and data-cache, as
+well as a shared L2-cache. This is a good exercise, and feedback will be
+given on your implementation.
+
+[IMPORTANT]
+.Prioritize your time
+====
+To make an informed choice, take a look at
+http://www.webcitation.org/6a2I3GpLv[the course description], and some of
+the
+https://absalon.itslearning.com/Folder/processfolder.aspx?FolderID=3112456[old
+exams]. Try to get an overview of what you need to know, and focus your
+studies on where you feel least confident. Beware however, that confidence
+is no substitute for knowledge.
+====
+
+If the effect of caching on performance is where you feel least confident,
+then this assignment is for you. In addition, this assignment further
+exercises modularization, stack-allocation (vs. static allocation), loops,
+bit-fiddling, and passing pointers around in C. This is a very good
+exercise before you proceed with the courses on
+http://www.webcitation.org/6c4dciEhE[Compilers] and
+http://www.webcitation.org/6c4diyg95[Operating Systems and Concurrent
+Programming]. If nothing else, we strongly recommend that you take a look
+at it in your own free time.
+
+Extend the configuration file format to also list the configuration for
+three caches — a separate instruction and data cache, as well as a shared
+L2 cache. The configuration for each cache is 3-fold "cache configuration
+line", listing the number of sets in the cache, the number of blocks per
+set, and the number of words per block. The numbers are all powers of 2,
+separated by commas, each of value at least 1, and at most 65536.
+
+Here is the new configuration file format in scanf-style syntax:
+
+----
+%u
+%u
+%u
+%u
+%u
+%u
+%u
+%u
+%zu,%zu,%zu
+%zu,%zu,%zu
+%zu,%zu,%zu
+----
+
+Here is a sample configuration file that adheres to this format:
+
+----
+3
+2
+0
+0
+0
+0
+0
+0
+4,2,1
+2,1,4
+1,4,2
+----
+
+Extend your `show_status` function to _also_ print the number of cache hits
+and misses while simulating the given program. Skew the number of clock
+cycles to model realistic performance. Assume that *a level-one cache miss
+costs 20 clock cycles*, and *a level-two cache miss costs 400 clock
+cycles*.  Note, it is not a requirement that you actually stall the
+pipeline.
+
+Your `show_status` should adhere to the following printf-style format:
+
+----
+Executed %zu instruction(s).
+%zu cycle(s) elapsed.
+icache hits: %zu, misses: %zu.
+dcache hits: %zu, misses: %zu.
+l2cache hits: %zu, misses: %zu.
+pc = 0x%x
+at = 0x%x
+v0 = 0x%x
+v1 = 0x%x
+t0 = 0x%x
+t1 = 0x%x
+t2 = 0x%x
+t3 = 0x%x
+t4 = 0x%x
+t5 = 0x%x
+t6 = 0x%x
+t7 = 0x%x
+sp = 0x%x
+ra = 0x%x
+----
+
+Implement a write-back writing strategy, with a random replacement
+strategy.
+
+Happy hacking!
+
+== Introduction
+
+A recurring theme in academia and industry is to question how to squeeze
+the last ounce of performance out of your digital computer. As the
+http://booksite.elsevier.com/9780123838728/[quantitative approach to
+computer architecture] has shown, and as best exemplified by the
+https://www.youtube.com/watch?v=3paiCK3dlK0[the success of the MIPS
+architecture], the best choice of computer architecture, depends on what
+you use computers for.
+
+Furthermore, it is often much cheaper, easier, and faster, to simulate
+computer architectures than to build and measure the performance of
+physical components.  The overarching theme for this year's G-assignments
+has been to introduce you to the practice of writing dynamic software
+simulators before making costly, static hardware choices.
+
+In this assignment, we will consider how various cache sizes, cache
+associativity, and cache block size, impact performance.
+
+====
+
+***MODELLING CONCEPT***
+
+Variables in C are "stack allocated" when declared inside a function
+definition. The conventional place to put a stack variable declaration is at
+the top of a function declaration. This way it is easy to glance over how much
+stack space the function will need.
+
+Stack variables may have any size, known at the _time of declaration_.
+Crucially, stack variables are *not* 0-initialized, and will contain
+_garbage_. They are available to the remaining body of the function, but
+using them after the function returns leads to _undefined behaviour_.
+Garbage and undefined behaviour have a lot in common.
+
+*Rule of thumb:* never return a pointer to a stack-allocated variable that was
+allocated in the same function.
+
+Stack variables are convenient for modelling elements whose size is determined
+at runtime, and should persist throughout the lifetime of a function
+call. For instance, the cache size, associativity, and block size, persist
+throughout the duration of a call to the `interp` function.
+
+====
+
+== Getting Started
+
+Recursively copy your solution to G2 into a new directory for this assignment.
+
+----
+~/ark$ mkdir 3rd
+~/ark$ cp -r 2nd/* 3rd/
+----
+
+Download the handout archive from Absalon and place it in the `~/ark`
+folder. Unpack the archive, to add/overwrite the new or updated handout
+files:
+
+----
+~/ark$ tar xvf g3-handout-v1.0.tar.gz
+----
+
+== A `mem` Module
+
+We will abstract away all memory operations away into a separate memory
+module which we'll call `mem`. This will make it easy to pass all memory
+operations through a series of caches instead of accessing the memory
+directly.
+
+A _module_ in C is a pair files: a _header file_ and an _implementation
+file_. The `mem` module consists of `mem.h` and `mem.c`, respectively.
+
+The header file specifies the public interface (API) of the module: it is
+included throughout the project. The implementation file provides the
+actual implementation of the module: it is compiled separately, and it is
+left to the linker to resolve external references to the module.
+
+====
+
+*EXERCISE*
+
+1. Create a header file called `mem.h`.
+
+2. Create an implementation file called `mem.c`, and `#include "mem.h"` in
+`mem.c`.
+
+====
+
+====
+
+*EXERCISE*
+
+Begin `mem.h` with the following lines:
+
+----
+#ifndef ARK2015_MEM_H
+#define ARK2015_MEM_H
+----
+
+And end it with the following line:
+
+----
+#endif // ARK2015_MEM_H
+----
+
+====
+
+The `#ifndef`, `#define`, `#endif` triple ensures that the macro
+`ARK2015_MEM_H`, and everything else between the `#ifndef` and `#endif`, is
+only ever defined once in the C program. If you recall, `#include` includes
+the content of a file unconditionally, without any regard to whether this
+file has been included before. "Include guards" like this, ensure that you
+avoid problems like duplicate declarations, and enable you to (almost)
+carelessly include `mem.h` where you see fit in your project.
+
+=== Compiling the `mem` Module
+
+To compile the `mem` module, you can do as we did with the `elf` module in
+our `Makefile` in
+https://github.com/onlineta/ark15/blob/master/g-assignments/1st/g1.asciidoc[G1].
+
+====
+
+*EXERCISE*
+
+1. Add a target `mem.o` to your `Makefile`, with `mem.h` and `mem.c` as
+prerequisites. Write a recipe for the `mem.o` target, in the same way as you
+did with `elf.o`. (You might, however, want to compile `mem.c` with the `-g`
+option to get GDB support.)
+
+2. List `mem.o` as a prerequisite to `sim`, and add it to the recipe in the
+same way as `elf.o`: The linker needs to know where to find the implementation
+of the `mem` module. 
+
+If in doubt about how Makefiles work, see
+https://github.com/onlineta/ark15/blob/master/g-assignments/1st/g1.asciidoc[G1].
+
+====
+
+=== Using the `mem` Module
+
+All memory operations should now happen through the `mem` module.
+
+====
+
+*EXERCISE*
+
+1. Move the macro `MEMSZ` to `mem.h`.
+
+2. Move the static byte-array `mem` from `sim.c` to `mem.c`.
+   The `mem` array should be declared "static" in two senses:
+
+  a. `mem` should be statically allocated, i.e. declared outside a function
+declaration.
+
+  b. `mem` should have internal linkage, i.e. it is not accessible outside
+the `mem` module implementation file. To make a variable have internal
+linkage, prefix its declaration with the keyword `static`.
+
+====
+
+The `mem` array should not (and by now, cannot) be accessed from `sim.c`
+directly. Instead, define and use the functions `inst_read`, `data_read`,
+and `data_write`.
+
+====
+
+*EXERCISE*
+
+Declare the following functions in `mem.h`:
+
+.~/ark/3rd/mem.h
+----
+int inst_read(uint32_t addr, uint32_t *read_inst);
+
+int data_read(uint32_t addr, uint32_t *read_data);
+
+int data_write(uint32_t addr, uint32_t data);
+----
+
+This is part of the public API of the `mem` module.
+
+====
+
+The `*_read` functions take two arguments: An address to read from and a
+pointer to where to put the data read from memory. We distinguish between
+`inst_read` and `data_read` as these should use separate caches.
+
+*Mental exercise*: Why should we use separate instruction- and data
+caches?
+
+All three functions above return an `int`. A negative return value indicates an
+error; a positive value indicates the number of clock cycles the processor
+should stall in case of a cache miss.
+
+[IMPORTANT]
+====
+This return value is not used in this guide. It is optional to actually
+stall the pipeline on a cache miss, and to report anything other than 0
+from `inst_read`, `data_read`, or `data_write`.
+====
+
+====
+
+*EXERCISE*
+
+1. Implement `inst_read`, `data_read`, and `data_write` in `mem.c`. For
+now, let them just read directly from, or write directly to `mem` using the
+good old `GET_BIGWORD` and `SET_BIGWORD` macros.
+
+2. Remove all uses of `GET_BIGWORD` and `SET_BIGWORD` in `sim.c`. Use
+`inst_read`, `data_read`, or `data_write` instead.
+
+====
+
+Before we can compile and test our code, we also need to fix the memory
+initialization procedure. Since `sim.c` no longer has access to the `mem`
+array, we will have to dump the ELF file in `mem.c` instead.
+
+====
+
+*EXERCISE*
+
+Declare the following function in `mem.h`:
+
+----
+int mem_init(const char *path, uint32_t *PC);
+----
+
+This function should be called before any further operations with the `mem`
+module.
+
+====
+
+The function should use `elf_dump` (declared in the `elf` module) to dump
+the contents of the ELF file at the given path to the `mem` array in
+`mem.c`. The function also takes the address of the PC register as
+an argument, and passes this address on to `elf_dump`.
+
+====
+
+*EXERCISE*
+
+* Implement `mem_init` in `mem.c`. The function should call `elf_dump` with
+  the given arguments. You can use `&mem[0]` and `MEMSZ` (as before) for the
+  remaining arguments. Let the return value of `mem_init` be the return value
+  of `elf_dump`.
+
+* Call `mem_init` where you otherwise would have called `elf_dump` in
+  `sim.c`.
+
+* Make sure to include everything you need in `mem.h` and `mem.c`. Clean up
+  in the includes of `sim.c` and `mem.c`. Make sure that everything compiles.
+
+====
+
+====
+
+*TESTING EXERCISE*
+
+Your code should now compile and run as before. Make sure that it does.
+
+====
+
+[TIP]
+.Troubleshooting
+====
+If you are hitting a segmentation fault on your use of `GET_BIGWORD` or
+`SET_BIGWORD` in `mem.c`, it is likely because you are doing something with
+`MIPS_RESERVE`. You shouldn't, yet. The implementations of `GET_BIGWORD`
+and `SET_BIGWORD` will subtract `MIPS_RESERVE` from the address you pass to
+them.
+====
+
+== Setting up the Caches
+
+We would like to see how caches of various sizes, associativity and block
+sizes affect program performance. In general, a cache consists of a number
+of sets, each set consisting of a number of blocks, each block consisting
+of a number of words. We can achieve the above dynamics by making it
+possible to specify for every cache:
+
+1. the number of sets in the cache,
+
+2. the number of blocks per set, and
+
+3. the number of words per block.
+
+For instance, an eight-block direct-mapped cache has 1 set, and 8 blocks
+per set. An eight-block fully-associative cache has 8 sets and 1 block per
+set. If these layout schemes seem a little mysterious to you, see Figure
+5.15 on p. 404 in <<COD5e>>.
+
+In this assignment, we will only consider cache, set, and block sizes which
+are powers of 2, of size at least 1, and at most 65536. For instance, the
+maximum associativity you should support is 65536. *Mental exercise*: What
+is the byte-size of the minimum and maximum cache that you should support?
+
+=== Declaring the Caches
+
+====
+
+*EXERCISE*
+
+Declare a struct `cache` in `mem.h` with the following fields:
+
+1. `n_sets`,
+
+2. `n_blocks_per_set`, and
+
+3. `n_words_per_block`.
+
+You can decide (and might later change) the numeric types of these fields.
+
+You might also want to add more fields to this struct later.
+
+Add also the following counter-variables to the struct:
+
+1. `size_t hits`, and
+
+2. `size_t misses`.
+
+====
+
+Next, we want to define the cache blocks themselves. Of course, a cache
+consists of a number of sets, where each set consists of a number of
+blocks. Although we could model this hierarchy, "sets" don't seem that
+special: Assuming that all cache blocks are stored in one array, a set is
+just a contiguous sub-array of this larger array of blocks.
+
+Before defining this array, let us define the `block` struct itself:
+
+====
+
+*EXERCISE*
+
+Declare a struct `block` above your declaration of the `cache` struct
+in `mem.h`.
+
+Add the following fields to the struct:
+
+1. `bool valid`,
+
+2. `bool modified`,
+
+3. `uint32_t tag`, and
+
+Finally, add the field `struct block *blocks` to your `cache` struct above
+(below in `mem.h`).
+
+====
+
+The reason that `cache.blocks` is a pointer, rather than e.g. an array of a
+given size, is that the size of this "array" is not known _at compile
+time_. It is first known _at runtime_ — once the configuration file has
+been read.
+
+We also need a place to store the cache data itself. Although it might seem
+natural to place the data in a block, we also don't know how many words a
+block should store until runtime. We could include a pointer to the data
+for every block in the `block` struct, but this would require an intricate
+initialization procedure.
+
+Instead, we could put all data into one, stack-allocated array, and offset
+into this array once we know the set and block offset we are looking for.
+It is a good idea to keep the data in the cache in big-endian format, as it
+is stored in the memory. This models the hardware more closely. Therefore,
+we will use an `unsigned char` (byte) array for the cache data itself.
+
+====
+
+*EXERCISE*
+
+Add an `unsigned char *data` field to your `cache` struct.
+
+====
+
+We will need three instances of the `cache` struct in the `mem` module: one
+for the instruction cache, one for the data cache, and one for the shared
+L2 cache. The `mem` module should consult these caches before falling back
+to accessing the `mem` array directly; thereby modelling a cache hierarchy.
+
+====
+
+*INTERNAL VS EXTERNAL LINKAGE*
+
+Every function and every variable in C can be internally or externally
+linked.  An internally linked variable or function is intended for use
+inside the same module, only.
+
+For instance, the `mem` array should have internal linkage as it shouldn't
+be accessed directly from outside the `mem` module. To declare an
+internally linked variable or function, don't mention it in the header
+file, and prefix its implementation with the keyword `static`.
+
+The functions `mem_init`, `data_read`, `inst_read`, and `data_write`, on
+the other hand, should have external linkage: they are intended to be used
+outside the `mem` module. To declare an externally linked variable or
+function, declare it in the header file, and don't prefix its
+implementation with the keyword `static`.
+
+Although the three caches perhaps similarly shouldn't be accessed directly
+from outside the `mem` module, we found it tedious to enforce their
+internal linkage — `sim.c` needs to initialize and probe the caches for
+status. Also, we thought it worth the exercise to show how you might
+declare variables with external linkage.
+
+====
+
+====
+
+*EXERCISE*
+
+1. Declare three instances of type `struct cache` in `mem.h` called
+`icache`, `dcache`, and `l2cache`. Prefix each declaration with the keyword
+`extern`.
+
+2. Declare three instances of type `struct cache` in `mem.h` called
+exactly `icache`, `dcache`, and `l2cache`. 
+
+====
+
+These two steps will declare `icache`, `dcache` and `l2cache` as `cache`
+structs accessible from both inside and outside the `mem` module.
+
+====
+
+*EXERCISE*
+
+Define a function `read_cache_config` in `sim.c` with the following
+interface:
+
+----
+int read_cache_config(FILE *fstream, struct cache *cache);
+----
+
+The function should read a cache configuration line as specified in
+<<_assignment>>.
+
+Call `read_cache_config` thrice in `read_config_stream` after you've read
+off the values for the temporary registers.
+
+====
+
+=== Stack Allocation
+
+Once you've read the cache configurations, you are ready to allocate arrays
+of appropriate size. For any given cache, the number of blocks is its
+`n_sets` times its `n_blocks_per_set`. It would be tedious to type this out
+by hand, so let's define a macro for this in `mem.h`:
+
+====
+
+*EXERCISE*
+
+Define a macro `N_BLOCKS` in `mem.h` which given a `cache` translates to
+`cache.n_sets * cache.n_blocks_per_set`. (Remember to put the translation
+in parentheses, to make sure that the macro behaves well in arithmetic
+expressions.)
+
+====
+
+====
+
+*EXERCISE*
+
+At the top of your `interp` in `sim.c`, declare 3 stack-allocated arrays
+for the blocks for the three different caches:
+
+----
+struct block icache_blocks[N_BLOCKS(icache)];
+struct block dcache_blocks[N_BLOCKS(dcache)];
+struct block l2cache_blocks[N_BLOCKS(l2cache)];
+----
+
+Then set the blocks field for each of the caches to point to these
+stack-allocated arrays.
+
+----
+icache.blocks = icache_blocks;
+dcache.blocks = dcache_blocks;
+l2cache.blocks = l2cache_blocks;
+----
+
+====
+
+The cache blocks are safe for use, as long as the `interp` function hasn't
+returned. If you followed along our instructions, you shouldn't return from
+the `interp` function before the simulator sees a `syscall` instruction, or
+otherwise fails to execute an instruction, and no instructions are executed
+after we return from `interp`.
+
+Note, it is still safe to use all the other fields in the `cache` structs
+after we return from `interp`.
+
+Before proceeding with the rest of `interp`, it is important to note that
+the cache blocks contain garbage: *stack-allocated variables are not
+0-initialized*. One common strategy to 0-initialize e.g.  stack-allocated
+arrays is to use the
+http://man7.org/linux/man-pages/man3/memset.3.html[`memset`] function,
+defined in `string.h`, which has following interface:
+
+----
+void *memset(void *s, int c, size_t n);
+----
+
+`memset` takes a pointer to the first value of a memory area (e.g. a
+stack-allocated array), the value to set every byte to (e.g. 0), and *the
+number of bytes* to set. That is, the function will set the `n` bytes
+starting at `s` to `c`. The function returns the given pointer, `s`. This
+return value can be safely ignored.
+
+*Mental exercise*: Why is the type `int` as the second argument to `memset`
+a bad idea?
+
+====
+
+*EXERCISE*
+
+`memset` your stack-allocated block arrays right after they have been declared:
+
+----
+memset(icache_blocks, 0, N_BLOCKS(icache) * sizeof(struct block));
+memset(dcache_blocks, 0, N_BLOCKS(dcache) * sizeof(struct block));
+memset(l2cache_blocks, 0, N_BLOCKS(l2cache) * sizeof(struct block));
+----
+
+Remember to include `<string.h>` at the top of your `sim.c`.
+
+*Mental exercise*: Why do we need to multiply the number of blocks by
+`sizeof(struct block)`? Why can't we just say e.g. `sizeof(icache_blocks)`?
+
+====
+
+Similarly to the block arrays, we want to stack-allocate the data arrays.
+
+====
+
+*EXERCISE*
+
+1. Declare a macro `N_BYTES` which given a cache translates to the total
+number of bytes storable in the cache. That is, the number of blocks, times
+the number of words per block, times the number of bytes per word. 
+
+2. Declare three data array as we declared the block arrays.
+
+3. Set the data pointers in the three caches to point to these
+stack-allocated arrays before proceeding with the rest of `interp`.
+
+*Mental exercise*: Do we need to 0-initialize the data arrays or is it okay
+that they contain garbage?
+
+====
+
+There is now a lot of initialization going on in `interp`. Some of it must
+happen in `interp`, such as the declaration of the block and data arrays.
+The rest, i.e. `memset` and assigning pointers can be abstracted away into
+some sort of a `cache_init` function in the `mem` module:
+
+====
+
+*REFACTORING EXERCISE*
+
+1. Declare a function `cache_init` in `mem.h`:
+
+  int cache_init(struct cache *cache,
+    struct block *blocks, unsigned char *data);
+
+2. Implement the function `cache_init` in `mem.c`.
+
+3. Call `cache_init` for each of the three caches in `interp` after
+declaring the block and data arrays.
+
+4. Clean up your includes in `sim.c`, and make sure to include `<string.h>`
+in your `mem.c`. Make sure that everything compiles.
+
+====
+
+== Using the Caches
+
+This part is intentionally left unguided.
+
+====
+
+*EXERCISE*
+
+Modify `inst_read`, `data_read` and `data_write` to read or write addresses
+via the caches. You should implement a two-level cache hierarchy, such that
+e.g. if the address is not in the instruction cache, it is looked up in the
+level-two shared cache, only if it is also not in the shared cache, it is
+looked up in the memory.
+
+You should implement a write-back writing strategy, with a random
+replacement strategy.
+
+Remember to mark every cache hit and miss, and change your `show_status` to
+report the hits and misses as specified in <<_assignment>>.
+
+Hints:
+
+* You might want to define macros for set and tag calculations.
+
+* You might want to define a `find_in_set` function to iterate over the
+  blocks in a set, looking for a block with a matching tag.
+
+====
+
+== Completely Optional: Extensions
+
+1. We implemented a write-back strategy for all caches. Add support for an
+extra option at the end of the cache configuration line to further specify
+if a write-through, or write-through with a write-buffer writing strategy
+should be used instead. Your simulator should still work as above, without
+the option.
+
+2. Implement a LRU replacement strategy instead of random.
+
+3. Is there a better, more cache-coherent memory layout for the caches? If
+you find one, try to implement it.
+
+== Submitting Your Solution
+
+Follow these steps to submit your solution.
+
+=== Finalize Your Solution
+
+Clean up your code, remove superfluous code, and add comments for the
+non-trivial parts.
+
+Write a *short* report (`g3-report.txt` or `g3-report.pdf`) documenting your
+solution. Discuss what works, what doesn't, if anything. Discuss the design
+decisions you have had to make, if any. To back your claims, test with the
+handed out test programs, and add your own. Discuss your tests in your report.
+
+Your report should be sufficient to get a good idea of the extent and quality
+of your implementation. **Your code will only be used to verify the claims you
+make in your report**.
+
+=== Package Your Code
+
+Use the `tar` command-line utility to package your code:
+
+----
+~/ark$ tar cvzf g3-code.tar.gz 3rd
+----
+
+=== Submit on Absalon
+
+Submit *two files* on Absalon:
+
+. Your report (`g3-report.txt` or `g3-report.pdf`)
+. Your archive (`g3-code.tar.gz`)
+
+Remember to *mark your team members* on Absalon.
+
+== References
+
+[bibliography]
+
+. [[[COD5e]]]  David A. Patterson and John L. Hennessy. _Computer Organization
+  and Design_.  Elsevier. 5th edition.
+
+.XKCD: The Cloud (source: http://xkcd.com/908/).
+image::http://imgs.xkcd.com/comics/the_cloud.png[align="center"]
+
+== Major Contributors
+
+This text was made possible by the hard and enduring work of the entire ARK15
+Course Team, and in particular the following members of the team:
+
+* Annie Jane Pinder <anpi@di.ku.dk>
+* Oleksandr Shturmov <oleks@oleks.info>
+
+A special thanks to Phillip Alexander Roschnowski <roschnowski@gmail.com> for
+the meticulous proof-reading.
