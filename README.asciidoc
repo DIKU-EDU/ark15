@@ -28,4 +28,4 @@ course progresses.
 
 . link:g-assignments/2nd/g2.asciidoc[Pipelined Execution]
 
-(More coming soon.)
+. link:g-assignments/3rd/g3.asciidoc[Caching (Optional)]
