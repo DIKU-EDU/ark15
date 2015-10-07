@@ -1,4 +1,4 @@
-= G3: Caching (Optional)
+= G3: Caching
 Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Major Contributors
 v1.0, October 7, 2015
 :doctype: article

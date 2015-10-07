@@ -13,7 +13,7 @@ comments or corrections, feel free to open issues and make pull requests.
 
 . link:g-assignments/2nd/g2.asciidoc[Pipelined Execution]
 
-. link:g-assignments/3rd/g3.asciidoc[Caching (Optional)]
+. link:g-assignments/3rd/g3.asciidoc[Caching]
 
 == Important Student Notice
 
