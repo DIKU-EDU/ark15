@@ -3,6 +3,18 @@
 This is a companion git-repository for the course materials. If you have any
 comments or corrections, feel free to open issues and make pull requests.
 
+== Tutorials
+
+* link:tutorials/linux-toolchains-and-assembly.asciidoc[Linux, Toolchains, and Assembly]
+
+== G-Assignments
+
+. link:g-assignments/1st/g1.asciidoc[Interpreting Instructions — Simulating Machines]
+
+. link:g-assignments/2nd/g2.asciidoc[Pipelined Execution]
+
+. link:g-assignments/3rd/g3.asciidoc[Caching (Optional)]
+
 == Important Student Notice
 
 **Don't publicly fork this repository, or otherwise make your course work
@@ -17,15 +29,3 @@ https://help.github.com/articles/importing-a-git-repository-using-the-command-li
 this repository], and keep a local, working copy,
 https://help.github.com/articles/fetching-a-remote/[pulling this remote] as the
 course progresses.
-
-== Tutorials
-
-* link:tutorials/linux-toolchains-and-assembly.asciidoc[Linux, Toolchains, and Assembly]
-
-== G-Assignments
-
-. link:g-assignments/1st/g1.asciidoc[Interpreting Instructions — Simulating Machines]
-
-. link:g-assignments/2nd/g2.asciidoc[Pipelined Execution]
-
-. link:g-assignments/3rd/g3.asciidoc[Caching (Optional)]
