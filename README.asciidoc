@@ -36,11 +36,12 @@ and Ruby, which can be thought of as advanced, abstract machines. The topic
 of simulating programming language however, is the subject matter for
 http://www.webcitation.org/6c4dciEhE[another DIKU course].
 
-This year's mandatory assignments also have a much more guided form than is
-usually the case. Our hope is that you will both learn, and have a good
-time doing the assignments.  Assignments read like (long) blog posts, and
-gradually build on one another. Of course, some of the digging, thinking,
-coding, and debugging is still left as an exercise for you.
+This year's mandatory assignments also have a much more guided form. Our
+hope is that you will both learn from, and have a great time solving the
+assignments.  Assignment texts read like (long) blog posts, and gradually
+build up your understanding of both MIPS architecture and C. Of course,
+some of the digging, thinking, coding, and debugging is still left as an
+exercise for you.
 
 == Tutorials
 
