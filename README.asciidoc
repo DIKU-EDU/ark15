@@ -1,7 +1,47 @@
 = Machine Architecture 2015 at DIKU
 
-This is a companion git-repository for the course materials. If you have any
-comments or corrections, feel free to open issues and make pull requests.
+This is a companion git-repository for the course
+http://www.webcitation.org/6a2I3GpLv[Machine Architecture (ARK)] at
+http://www.diku.dk[DIKU]. If you have any comments or corrections, feel
+free to open issues and make pull requests.
+
+== Introduction
+
+A recurring theme in academia and industry is to question how to squeeze
+the last ounce of performance out of your digital computer. As the
+http://booksite.elsevier.com/9780123838728/[quantitative approach to
+computer architecture] has shown, and as best exemplified by the
+https://www.youtube.com/watch?v=3paiCK3dlK0[the success of the MIPS
+architecture], the best choice of computer architecture, depends on what
+you use computers for.
+
+It is often also much cheaper, easier, and faster, to simulate computer
+architectures than to build and measure the performance of physical
+components.  The overarching theme for this year's mandatory assignments is
+to introduce you to the practice of writing dynamic software simulators for
+the purposes of later making costly, static hardware choices.
+
+Our language of choice may seem a bit unusual: it is C.
+
+C is, of course, part of the learning objectives for this course.  We hope
+that by using C to simulate hardware, you will grow to appreciate the
+simplicities, subtleties, and the basic levels of abstraction in C. The
+programs you will write will probably get as close to fiddling with bits as
+a C program typically gets. At the same time, we will simulate hardware
+components using higher level data structures.
+
+C is not an unusual choice for simulating machines. C is often the language
+of choice for writing higher level interpreters and compilers, which can be
+thought of as advanced, abstract machine. For instance, Python and Ruby are
+both written in C. The topic of writing interpreters and compilers however,
+is the subject matter for http://www.webcitation.org/6c4dciEhE[another DIKU
+course].
+
+This year's mandatory assignments also have a much more guided form than is
+usually the case. Our hope is that you will both learn, and have a good
+time doing the assignments.  Assignments read like (long) blog posts, and
+gradually build on one another. Of course, some of the digging, thinking,
+coding, and debugging is still left as an exercise for you.
 
 == Tutorials
 
