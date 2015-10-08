@@ -83,4 +83,4 @@ Our goal has been to make sure that students gain sufficient skills in C,
 and gradually build up a simulator advanced enough to later host an
 operating system.  The next step is to build upon these changes in the
 Operating Systems and Concurrent Programming course, and later, the course
-on Computer Networks, in the spring of 2016.
+on Computer Networks. These are held in the spring of 2016.
