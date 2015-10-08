@@ -74,12 +74,13 @@ course progresses.
 
 The DIKU courses on Machine Architecture, Operating Systems and Concurrent
 Programming, and Computer Networks stand to be combined into a
-one-semester course called Computer Systems as of fall 2016.
+one-semester course called Computer Systems, as of fall 2016.
 
-These changes to the Machine Architecture 2015 course are made in first
-step to unifying the three courses into one coherent whole. The intent of
-this year's mandatory assignments has been to make sure students gain
-sufficient skills in C, and build up a simulator advanced enough to later
-host an operating system.  The next step is to build upon these changes in
-the Operating Systems and Concurrent Programming course, and later, the
-course on Computer Networks, in the spring of 2016.
+These changes to the Machine Architecture 2015 course make a first
+step towards unifying these courses into one coherent whole.
+
+We have tried to make sure students gain sufficient skills in C, and build
+up a simulator advanced enough to later host an operating system.  The next
+step is to build upon these changes in the Operating Systems and Concurrent
+Programming course, and later, the course on Computer Networks, in the
+spring of 2016.
