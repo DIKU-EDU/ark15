@@ -77,7 +77,7 @@ Programming, and Computer Networks stand to be combined into a one-semester
 course called Computer Systems, as of fall 2016.
 
 Our changes to the Machine Architecture 2015 course make a first
-step towards unifying the courses into one coherent whole.
+step towards unifying these courses into one coherent whole.
 
 We have tried to make sure students gain sufficient skills in C, and build
 up a simulator advanced enough to later host an operating system.  The next
