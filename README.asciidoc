@@ -33,7 +33,7 @@ hardware components using high level data structures in C.
 C is not an unusual choice for simulating machines. C is often the language
 of choice for simulating higher level programming languages, e.g. Python
 and Ruby, which can be thought of as advanced, abstract machines. The topic
-of simulating programming language however, is the subject matter for
+of simulating programming languages however, is the subject matter for
 http://www.webcitation.org/6c4dciEhE[another DIKU course].
 
 This year's mandatory assignments also have a much more guided form. Our
@@ -69,3 +69,17 @@ https://help.github.com/articles/importing-a-git-repository-using-the-command-li
 this repository], and keep a local, working copy,
 https://help.github.com/articles/fetching-a-remote/[pulling this remote] as the
 course progresses.
+
+== Future Work and Future Use
+
+The DIKU courses on Machine Architecture, Operating Systems and Concurrent
+Programming, and Computer Networks stand to be combined into a
+one-semester course called Computer Systems as of fall 2016.
+
+These changes to the Machine Architecture 2015 course are made in first
+step to unifying the three courses into one coherent whole. The intent of
+this year's mandatory assignments has been to make sure students gain
+sufficient skills in C, and build up a simulator advanced enough to later
+host an operating system.  The next step is to build upon these changes in
+the Operating Systems and Concurrent Programming course, and later, the
+course on Computer Networks, in the spring of 2016.
