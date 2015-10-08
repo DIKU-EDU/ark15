@@ -31,11 +31,10 @@ bits as a C program can get. At the same time, we will simulate a range of
 hardware components using high level data structures in C.
 
 C is not an unusual choice for simulating machines. C is often the language
-of choice for writing higher level interpreters and compilers, which can be
-thought of as advanced, abstract machine. For instance, Python and Ruby are
-both written in C. The topic of writing interpreters and compilers however,
-is the subject matter for http://www.webcitation.org/6c4dciEhE[another DIKU
-course].
+of choice for simulating higher level programming languages, e.g. Python
+and Ruby, which can be thought of as advanced, abstract machines. The topic
+of simulating programming language however, is the subject matter for
+http://www.webcitation.org/6c4dciEhE[another DIKU course].
 
 This year's mandatory assignments also have a much more guided form than is
 usually the case. Our hope is that you will both learn, and have a good
