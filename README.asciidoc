@@ -47,7 +47,7 @@ exercise for you.
 
 * link:tutorials/linux-toolchains-and-assembly.asciidoc[Linux, Toolchains, and Assembly]
 
-== G-Assignments
+== Assignments
 
 . link:g-assignments/1st/g1.asciidoc[Interpreting Instructions — Simulating Machines]
 
