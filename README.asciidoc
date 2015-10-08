@@ -73,11 +73,11 @@ course progresses.
 == Future Work and Future Use
 
 The DIKU courses on Machine Architecture, Operating Systems and Concurrent
-Programming, and Computer Networks stand to be combined into a
-one-semester course called Computer Systems, as of fall 2016.
+Programming, and Computer Networks stand to be combined into a one-semester
+course called Computer Systems, as of fall 2016.
 
-These changes to the Machine Architecture 2015 course make a first
-step towards unifying these courses into one coherent whole.
+Our changes to the Machine Architecture 2015 course make a first
+step towards unifying the courses into one coherent whole.
 
 We have tried to make sure students gain sufficient skills in C, and build
 up a simulator advanced enough to later host an operating system.  The next
