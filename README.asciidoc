@@ -1,4 +1,4 @@
-= Welcome to ARK15 at DIKU
+= Machine Architecture 2015 at DIKU
 
 This is a companion git-repository for the course materials. If you have any
 comments or corrections, feel free to open issues and make pull requests.
