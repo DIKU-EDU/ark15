@@ -27,8 +27,8 @@ C is, of course, part of the learning objectives for this course.  We hope
 that by using C to simulate hardware, you will grow to appreciate the
 simplicities, subtleties, and the basic levels of abstraction available in
 C. The programs you will write will probably get as close to fiddling with
-bits as a C program typically gets. At the same time, we will simulate
-hardware components using higher level data structures.
+bits as a C program can get. At the same time, we will simulate hardware
+components using higher level data structures.
 
 C is not an unusual choice for simulating machines. C is often the language
 of choice for writing higher level interpreters and compilers, which can be
