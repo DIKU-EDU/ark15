@@ -1427,6 +1427,9 @@ end of `cycle`, once all the pipeline registers have been set.
 
 Define a function stub `forward()`, and call it at the end of `cycle`.
 
+*Mental exercise*: Should you call `forward()` before, or after calling
+`branch()` and `jump()`?
+
 ====
 
 ==== EX hazards
