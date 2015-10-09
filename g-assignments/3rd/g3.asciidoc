@@ -195,14 +195,6 @@ Recursively copy your solution to G2 into a new directory for this assignment.
 ~/ark$ cp -r 2nd/* 3rd/
 ----
 
-Download the handout archive from Absalon and place it in the `~/ark`
-folder. Unpack the archive, to add/overwrite the new or updated handout
-files:
-
-----
-~/ark$ tar xvf g3-handout-v1.0.tar.gz
-----
-
 == A `mem` Module
 
 We will abstract away all memory operations away into a separate memory
