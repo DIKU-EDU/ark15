@@ -550,7 +550,7 @@ declare variables with external linkage.
 `icache`, `dcache`, and `l2cache`. Prefix each declaration with the keyword
 `extern`.
 
-2. Declare three instances of type `struct cache` in `mem.h` called
+2. Declare three instances of type `struct cache` in `mem.c` called
 exactly `icache`, `dcache`, and `l2cache`. 
 
 ====
