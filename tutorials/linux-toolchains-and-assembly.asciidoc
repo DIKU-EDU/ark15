@@ -1329,7 +1329,8 @@ linking of multiple files. Run the `configure` script to produce a Makefile
 with the selected options:
 
 ----
-~/opt/build-binutils$ ../binutils-2.25/configure --target="mips-elf" --prefix="$HOME/opt/cross" --with-sysroot --disable-nls --disable-werror
+~/opt/build-binutils$ ../binutils-2.25/configure --target="mips-elf" \
+--prefix="$HOME/opt/cross" --with-sysroot --disable-nls --disable-werror
 ----
 
 [TIP]
@@ -1382,7 +1383,8 @@ Unpack the archive and create a folder `~/opt/build-gcc/`. Configure the GNU
 Compiler Collection sources:
 
 ----
-~/opt/build-gcc$ ../gcc-5.1.0/configure --target="mips-elf"  --prefix="$HOME/opt/cross" --disable-nls --enable-languages=c --without-headers
+~/opt/build-gcc$ ../gcc-5.1.0/configure --target="mips-elf" \
+--prefix="$HOME/opt/cross" --disable-nls --enable-languages=c --without-headers
 ----
 
 The configuration arguments for the GNU Compiler Collection are very similar to
