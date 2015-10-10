@@ -1,6 +1,6 @@
 = Tutorial: Linux, Toolchains, and Assembly
 ARK15 Course Team <ark15@dikumail.dk>; see also Major Contributors
-v1.0, August 31, 2015
+v1.1, October 10, 2015
 :doctype: article
 :backend: html5
 :docinfo:
