@@ -1201,8 +1201,8 @@ end of a clock cycle".
 **EXERCISE**
 
 At the end of your `cycle` function (after the call to `interp_if`), check if
-the `ex_mem.branch` control bit is set and also `ex_mem.alu_res` is 0. If they
-are, set `PC` to `ex_mem.branch_target`.
+the `ex_mem.branch` control bit is set and that `ex_mem.alu_res` is 0. If this
+is the case, set `PC` to `ex_mem.branch_target`.
 
 ====
 
