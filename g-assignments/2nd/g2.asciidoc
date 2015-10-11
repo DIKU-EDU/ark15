@@ -662,8 +662,8 @@ This field will be needed later for R-type instructions.  Since this field
 otherwise goes unused for the `lw`, `sw`, `beq`, and `bne` instructions, we can
 use it to "spoof" an ALU control unit.
 
-For `lw` and `sw` instructions, the `funct` field should be set to `FUNCT_ADD`
-(defined in `mips32.h`).
+For the `lw` and `sw` instructions, the `funct` field should be set to
+`FUNCT_ADD` (defined in `mips32.h`).
 
 ====
 
