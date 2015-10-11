@@ -659,8 +659,8 @@ define a so-called "ALU control unit" (see pages 259-261, as well as Figure
 
 We will take a shortcut and use a `funct` field in our ID/EX pipeline register.
 This field will be needed later for R-type instructions.  Since this field
-otherwise goes unused for the instructions `lw`, `sw`, `beq`, and `bne`
-instructions, we can use it to "spoof" an ALU control unit.
+otherwise goes unused for the `lw`, `sw`, `beq`, and `bne` instructions, we can
+use it to "spoof" an ALU control unit.
 
 For `lw` and `sw` instructions, the `funct` field should be set to `FUNCT_ADD`
 (defined in `mips32.h`).
