@@ -1070,8 +1070,9 @@ Add support for `FUNCT_SYSCALL` in `alu`.
 **TESTING EXERCISE**
 
 Check that your interpreter works as intended with the provided `add.S`.
-Provided that register `t0` has the initial value x, you should see the value x
-in register `t1` if everything works as intended.
+Provided that registers `t0` and `t1` have the initial values x and y
+respectively, you should see the value (x + y) in register `v0` if everything
+works as intended.
 
 If you are having trouble, check your implementation stage-by-stage.
 
