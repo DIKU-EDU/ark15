@@ -1,5 +1,5 @@
 # v0 should *not* be set to double the value of t0.
-# Also, ra should be something like 0x40001c.
+# Also, ra should be something like 0x400020.
 # t0 must be something other than zero for this to work.
 # The nops are there to get the instructions through the pipeline, one at a
 # time.
