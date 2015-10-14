@@ -84,3 +84,14 @@ and gradually build up a simulator advanced enough to later host an
 operating system.  The next step is to try to build upon these changes in
 the Operating Systems and Concurrent Programming course, and later, the
 course on Computer Networks. These are held in the spring of 2016.
+
+== Major Contributors
+
+This content was made possible by the hard and enduring work of the entire
+ARK15 Course Team, and in particular the following members of the team:
+
+* Annie Jane Pinder <anpi@di.ku.dk>
+* Oleksandr Shturmov <oleks@oleks.info>
+
+A special thanks to Phillip Alexander Roschnowski <roschnowski@gmail.com> for
+the meticulous proof-reading.
