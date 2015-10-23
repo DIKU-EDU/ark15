@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<style type="text/css">
+@media print {
+  body {
+    -webkit-print-color-adjust:exact;
+  }
+  #config {
+    display:none;
+  }
+}
+body {
+  font: 100% monospace;
+  text-align: center;
+  max-width: 960px;
+  margin:1em auto;
+  background:white;
+}
+input {
+  font: 2em monospace;
+}
+#binary span {
+  font: 2em monospace;
+}
+#sign_2 {
+  text-align:center
+}
+.author {
+  padding-bottom:1em;
+}
+#config {
+  padding:1em 0;
+  font-size:1.5em;
+}
+.help {
+  padding: 1em 0;
+}
+.big {
+  font-size: 2em;
+}
+#problem {
+  padding: 1em 0;
+}
+#bits {
+  width:960px;
+  margin:0 auto;
+}
+#bits table {
+  margin:0 auto;
+}
+#bits td {
+  text-align:center;
+}
+#bits sup {
+  font-size:0.7em;
+}
+.part_descr {
+  padding-top:1em;
+}
+#log_container {
+  margin-top:1em;
+}
+#log_container table {
+  width:100%;
+}
+#log_container table {
+  font-weight:bold
+}
+</style>
+<meta name="keywords" content="Machine Architecture,Maskinarkitektur,ARK,2015,DIKU,IEEE-754,Floating-Point,Number Representations,flydende tal,talrepræsenationer"/>
+<title>IEEE-754 Game</title>
+<style type="text/css">
+</style>
+</head>
+<body>
+<section>
+<div class="author">
+  Created @ <a href="http://www.diku.dk/" target="_blank">DIKU</a>.
+</div>
+<div id="config">
+  <div>
+    Approximation a
+    <select id="n_digits" onchange="manualOverride()">
+      <option value="1">1</option>
+      <option value="2" selected>2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+    </select>-digit real number as an<br/> IEEE-754, single-precision
+    floating-point number.
+  </div>
+</div>
+<div class="help">
+  <div>
+  Wait, what?
+  <a href="https://en.wikipedia.org/wiki/Real_number"
+    target="_blank">Real numbers?</a>
+  <a href="https://www.youtube.com/watch?v=PZRI1IfStY0"
+    target="_blank">Floating-point numbers?</a>
+  </div>
+  <div>
+  Where are the <a href="#" onClick='window.location="view-source:" + window.location.href'>cheat codes?</a>
+  </div>
+  <div><br/>
+    Learn best by example? Try this <a
+      href="http://www.h-schmidt.net/FloatConverter/IEEE754.html"
+      target="_blank">online IEEE-754 converter</a>.
+  </div>
+</div>
+<div id="problem" class="big">&nbsp;</div>
+<button type="button" onclick="generate()">(Pick another number)</button>
+<div id="answer">
+  <div class="part_descr">
+    First, convert the (unsigned) integral to binary and <b>approximate</b> the fractional part:
+  </div>
+  <div id="bits" class="part_input"></div>
+  <div class="part_descr">
+    So you say it is
+  </div>
+  <div id="base2" class="big part_input"></div>
+  <div>=</div>
+  <div id="base2mul" class="big part_input"></div>
+  <div class="part_descr">
+    Now, write out the sign bit, <b>biased</b>(+127) exponent in binary:
+  </div>
+  <div id="binary" class="part_input">
+    <input id="sign_2" type="text" maxlength=1 size=1
+      onkeypress="keypress(event)" />
+    <input id="biased_exp_2" type="text" maxlength=8 size=8
+      onkeypress="keypress(event)" />
+    <span id="mentissa_2" size=8></span>
+  </div>
+</div>
+<div class="points">Correct: <span id="points"></span></div>
+<div id="log_container">
+<table>
+  <thead>
+    <tr><td>Problem</td><td>Solution</td><td>Your Answer</td>
+  </thead>
+  <tbody id="log"></tbody>
+</table>
+</div>
+</section>
+<script type="text/javascript" src="underscore-min.js"></script>
+<script type="text/javascript">
+var NO_COLOR = "white";
+var GOOD_COLOR = "springgreen";
+var BAD_COLOR = "orangered";
+
+var hamsterInteger = 0;
+var hamsterMenBits = "";
+var hamsterExp =0;
+var hamsterExpBits = "";
+var nIntegralBits = 0;
+var selectedBits = "";
+var number = 0;
+var sign = "";
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function setbg(color) {
+  document.body.style.backgroundColor = color;
+}
+
+function resetbg() {
+  setbg("white");
+}
+
+function flashbg(color) {
+  setbg(color);
+  setTimeout(resetbg, 250);
+}
+
+function manualOverride() {
+  generate();
+}
+
+function addBit(exp, labelRow, inputRow) {
+  var expStr = exp.toString(10);
+
+  labelRow.insertCell(-1).innerHTML = [
+      "<label for=\"bit", expStr, "\">",
+      "2<sup>", expStr, "</sup></label>"
+    ].join("");
+
+  inputRow.insertCell(-1).innerHTML = [
+      "<input id=\"bit", expStr,
+      "\" onchange=\"checkBit(this)\" type=\"checkbox\"/>"
+    ].join("");
+}
+
+function showBits() {
+  var table = document.createElement("table");
+  var bitRow = table.insertRow(0);
+
+  var header = table.createTHead();
+  var headerRow = header.insertRow(0);
+
+  var minFractionalExp = nIntegralBits - hamsterBase2.length;
+
+  for ( var i = nIntegralBits - 1; i >= minFractionalExp; i-- ) {
+    addBit(i, headerRow, bitRow);
+  }
+
+  var bits = $("bits");
+  while (bits.firstChild) {
+    bits.removeChild(bits.firstChild);
+  }
+  bits.appendChild(table);
+}
+
+function base2Exp(exp) {
+  var exp = [(exp + 127).toString(2)];
+
+  var nZerosToAdd = 8 - exp[0].length;
+
+  for ( var i = 0; i < nZerosToAdd; i++ ) {
+    exp.splice(0,0,"0");
+  }
+
+  return exp.join("");
+}
+
+function showBase2() {
+  inputs = document.querySelectorAll("#bits tbody input");
+
+  base2 = [];
+
+  for ( var i = 0; i < inputs.length; ++i ) {
+    base2.push(inputs[i].checked ? "1" : "0");
+  }
+
+  if (base2.join("") === hamsterBase2) {
+    $("base2").style.backgroundColor = GOOD_COLOR;
+    $("base2mul").style.backgroundColor = GOOD_COLOR;
+    $("mentissa_2").style.backgroundColor = GOOD_COLOR;
+    $("sign_2").focus();
+    for ( var i = 0; i < inputs.length; ++i ) {
+      inputs[i].disabled = true;
+    }
+  } else {
+    $("base2").style.backgroundColor = NO_COLOR;
+    $("base2mul").style.backgroundColor = NO_COLOR;
+    $("mentissa_2").style.backgroundColor = NO_COLOR;
+  }
+
+  var base2mul = [base2.join("")];
+  
+  base2.splice(0, 0, sign);
+  base2.splice(nIntegralBits + 1, 0, ".");
+  base2.push(" * 2<sup>0</sup>");
+
+  $("base2").innerHTML = base2.join("");
+
+  var first = base2mul[0].indexOf("1") + 1;
+  var exp = nIntegralBits - first;
+
+  if ( first == 0 ) { // (unsigned) 0.0, i.e. denormalized
+    first = 1;
+    exp = -127;
+  }
+
+  mentissa2 = base2mul[0].slice(first).substring(0,23);
+  base2mul[0] = sign + base2mul[0].slice(0, first) + "." +
+    base2mul[0].slice(first);
+  base2mul.push(" * 2<sup>");
+  base2mul.push(exp.toString(10));
+  base2mul.push("</sup>");
+
+  $("base2mul").innerHTML = base2mul.join("");
+
+  $("mentissa_2").innerHTML = mentissa2;
+}
+
+function setHamster(numStr) {
+  var num = parseFloat(numStr).toString(2);
+  var base2 = num.replace("-", "").replace(".", "").split("");
+  var nBase2Bits = 24;
+
+  var first = base2.indexOf("1") + 1;
+  var exp = nIntegralBits - first;
+  if (first === 0) { // (unsigned) 0.0, i.e. denormalized
+    first = 1;
+    exp = -127;
+  } else {
+    nBase2Bits = first + 24;
+  }
+
+  hamsterExp = exp + 127;
+  hamsterExpBits = base2Exp(exp);
+
+  for ( var i = nBase2Bits - base2.length; i > 0; i-- ) {
+    base2.push("0");
+  }
+  base2 = base2.join("");
+  hamsterBase2 = base2.substring(0, nBase2Bits);
+  hamsterMenBits = base2.substring(first, first + 23);
+}
+
+function generate() {
+  var num = [];
+
+  var n_digits = $("n_digits").value;
+  var decpnt = Math.round(Math.random() * (n_digits - 1)) + 1;
+
+  num.push(Math.round(Math.random() * 9).toString(10));
+  if ( num[0] === "0" ) {
+    decpnt = 1;
+  }
+
+  for ( var i = 1; i < n_digits; i++ ) {
+    num.push(Math.round(Math.random() * 9).toString(10));
+  }
+
+//  num = [ "0", "5" ];
+//  decpnt = 1;
+
+  hamsterInteger = parseInt(num.slice(0,decpnt).join(""), 10);
+  nIntegralBits = Math.max(Math.floor(Math.log2(hamsterInteger)) + 1, 1);
+
+  if ( decpnt < num.length ) {
+    num.splice(decpnt, 0, ".");
+  }
+
+  sign = Math.round(Math.random()) === 0 ? "-" : "";
+  num.splice(0, 0, sign);
+
+  num = num.join("");
+  setHamster(num);
+  $("problem").innerHTML = num;
+
+  showBits();
+  showBase2();
+}
+
+function checkBit(input) {
+  var parentIndex = [].indexOf.call(
+    input.parentNode.parentNode.children, input.parentNode);
+  if (hamsterBase2[parentIndex] == "1") {
+    input.parentNode.style.backgroundColor = GOOD_COLOR;
+    input.disabled = true;
+  } else {
+    failedTryAgain();
+  }
+
+  showBase2();
+}
+
+function failedTryAgain() {
+  flashbg(BAD_COLOR);
+  log(BAD_COLOR);
+  generate();
+}
+
+function successTryAgain() {
+  flashbg(GOOD_COLOR);
+  log(GOOD_COLOR);
+  generate();
+}
+
+function keypress(e) {
+  if (e.keyCode === 13) {
+    check();
+  }
+}
+
+function check() {
+  if (($("mentissa_2").innerText === hamsterMenBits)
+    && ($("sign_2").value === "0") === (sign === "")
+    && ($("biased_exp_2").value === hamsterExpBits)) {
+    successTryAgain();
+  } else {
+    failedTryAgain();
+  }
+}
+
+function pad(str, len, chr) {
+  var res = [str];
+  var toAdd = len - res[0].length;
+
+  for ( var i = 0; i < toAdd; i++ ) {
+    res.push(chr);
+  }
+
+  return res.join("");
+}
+
+function log(color) {
+  var problem = $("problem").innerHTML;
+  var signBit = sign === "-" ? "1" : "0";
+
+  var givenSignBit = pad($("sign_2").value, 1, "_");
+  var givenExpBits = pad($("biased_exp_2").value, 8, "_");
+  var givenMenBits = $("mentissa_2").innerText;
+  var answer = [
+    givenSignBit, " ",
+    givenExpBits, " ",
+    givenMenBits].join("");
+
+  var solutionSign = sign === "-" ? "1" : "0";
+  var solution = [
+    solutionSign, " ",
+    hamsterExpBits + " " +
+    hamsterMenBits].join("");
+
+  var entry = document.createElement("tr");
+  entry.setAttribute("bgcolor", color);
+  entry.innerHTML = "<td>" + problem + "</td><td>" +
+    solution + "</td><td>" + answer + "</td>";
+  var log = $("log");
+
+  log.insertBefore(entry, log.firstChild);
+}
+
+function keypress(e) {
+  if (e.keyCode === 13) {
+    check();
+  }
+}
+
+generate();
+</script>
+</body>
+</html>
