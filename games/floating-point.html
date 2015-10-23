@@ -7,7 +7,7 @@
   body {
     -webkit-print-color-adjust:exact;
   }
-  #config {
+  #config, #problem, .help, #answer, #giveup, #compatibility {
     display:none;
   }
 }
@@ -81,7 +81,7 @@ input {
 <body>
 <section>
 <div class="author">
-  Created @ <a href="http://www.diku.dk/" target="_blank">DIKU</a>. (Works best in Google Chrome.)
+  Created @ <a href="http://www.diku.dk/" target="_blank">DIKU</a>. <span id="compatibility">(Works best in Google Chrome.)</span>
 </div>
 <div id="config">
   <div>
@@ -113,7 +113,7 @@ input {
   </div>
 </div>
 <div id="problem" class="big">&nbsp;</div>
-<button type="button" onclick="generate()">(Pick another number)</button>
+<button id="giveup" type="button" onclick="generate()">(Pick another number)</button>
 <div id="answer">
   <div class="part_descr">
     First, convert the (unsigned) integral to binary and <b>approximate</b> the fractional part:
