@@ -345,10 +345,12 @@ function checkBit(input) {
     input.parentNode.parentNode.children, input.parentNode);
   if (hamsterBase2[parentIndex] == "1") {
     input.parentNode.style.backgroundColor = GOOD_COLOR;
-    input.disabled = true;
   } else {
-    failedTryAgain();
+    input.parentNode.style.backgroundColor = BAD_COLOR;
+    input.checked = false;
   }
+
+  input.disabled = true;
 
   showBase2();
 }
