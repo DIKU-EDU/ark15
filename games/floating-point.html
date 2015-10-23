@@ -206,7 +206,7 @@ function showBits() {
   var header = table.createTHead();
   var headerRow = header.insertRow(0);
 
-  var minFractionalExp = nIntegralBits - hamsterBase2.length + 1;
+  var minFractionalExp = nIntegralBits - hamsterBase2.length;
 
   for ( var i = nIntegralBits - 1; i >= minFractionalExp; i-- ) {
     addBit(i, headerRow, bitRow);
@@ -293,7 +293,7 @@ function setHamster(numStr) {
     first = 1;
     exp = -127;
   } else {
-    nBase2Bits = first + 24;
+    nBase2Bits = first + 23;
   }
 
   hamsterExp = exp + 127;
@@ -328,8 +328,8 @@ function generate() {
     num.push(Math.round(Math.random() * 9).toString(10));
   }
 
-//  num = [ "6", "5" ];
-//  decpnt = 2;
+  num = [ "0", "1" ];
+  decpnt = 1;
 
   hamsterInteger = parseInt(num.slice(0,decpnt).join(""), 10);
   nIntegralBits = Math.max(Math.floor(Math.log2(hamsterInteger)) + 1, 1);
