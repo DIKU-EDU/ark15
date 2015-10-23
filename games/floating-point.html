@@ -142,11 +142,10 @@ input {
 </table>
 </div>
 </section>
-<script type="text/javascript" src="underscore-min.js"></script>
 <script type="text/javascript">
 var NO_COLOR = "white";
 var GOOD_COLOR = "springgreen";
-var BAD_COLOR = "orangered";
+var BAD_COLOR = "darksalmon";
 
 var hamsterInteger = 0;
 var hamsterMenBits = "";
@@ -301,6 +300,11 @@ function setHamster(numStr) {
 }
 
 function generate() {
+  $("sign_2").value = "";
+  $("biased_exp_2").value = "";
+  $("sign_2").blur();
+  $("biased_exp_2").blur();
+
   var num = [];
 
   var n_digits = $("n_digits").value;
