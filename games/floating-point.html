@@ -205,7 +205,7 @@ function showBits() {
   var header = table.createTHead();
   var headerRow = header.insertRow(0);
 
-  var minFractionalExp = nIntegralBits - hamsterBase2.length;
+  var minFractionalExp = nIntegralBits - hamsterBase2.length + 1;
 
   for ( var i = nIntegralBits - 1; i >= minFractionalExp; i-- ) {
     addBit(i, headerRow, bitRow);
