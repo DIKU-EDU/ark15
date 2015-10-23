@@ -81,7 +81,7 @@ input {
 <body>
 <section>
 <div class="author">
-  Created @ <a href="http://www.diku.dk/" target="_blank">DIKU</a>. (Only supported in Google Chrome.)
+  Created @ <a href="http://www.diku.dk/" target="_blank">DIKU</a>. (Works best in Google Chrome.)
 </div>
 <div id="config">
   <div>
@@ -327,8 +327,8 @@ function generate() {
     num.push(Math.round(Math.random() * 9).toString(10));
   }
 
-//  num = [ "0", "5" ];
-//  decpnt = 1;
+//  num = [ "6", "5" ];
+//  decpnt = 2;
 
   hamsterInteger = parseInt(num.slice(0,decpnt).join(""), 10);
   nIntegralBits = Math.max(Math.floor(Math.log2(hamsterInteger)) + 1, 1);
@@ -383,7 +383,7 @@ function keypress(e) {
 
 function check() {
   count++;
-  if (($("mentissa_2").innerText === hamsterMenBits)
+  if (($("mentissa_2").textContent === hamsterMenBits)
     && ($("sign_2").value === "0") === (sign === "")
     && ($("biased_exp_2").value === hamsterExpBits)) {
     goodCount++;
@@ -410,11 +410,13 @@ function log(color) {
 
   var givenSignBit = pad($("sign_2").value, 1, "_");
   var givenExpBits = pad($("biased_exp_2").value, 8, "_");
-  var givenMenBits = $("mentissa_2").innerText;
+  var givenMenBits = $("mentissa_2").textContent;
   var answer = [
     givenSignBit, " ",
     givenExpBits, " ",
     givenMenBits].join("");
+
+  alert(hamsterMenBits);
 
   var solutionSign = sign === "-" ? "1" : "0";
   var solution = [
