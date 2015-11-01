@@ -13,7 +13,7 @@ v1.3, November 1, 2015
 .This assignment is under heavy reconstruction
 ====
 
-As a side-effect of trying to follow [[COD5e]] as closely as possible, the
+As a side-effect of trying to follow <<COD5e>> as closely as possible, the
 resulting pipelined simulator is extremely non-modular, fragile and often hard
 to debug and test automatically — as field-testing this assignment has shown.
 
