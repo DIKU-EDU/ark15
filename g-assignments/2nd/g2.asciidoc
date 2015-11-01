@@ -28,10 +28,10 @@ thing, do one thing quickly. The factorization also permits to skip phases when
 those are unnecessary.
 
 The change will be to implement the pipeline in a more functional, less
-imperative approach, converting phases into side-effect-free (except in terms
-of using time and space) functions, implementing branching, jumping, and
-forwarding in an "executive" (coordinator) fashion (which was already the case
-anyway).
+imperative, less globally-scoped way, converting phases into side-effect-free
+functions (except in terms of them using time and space), implementing
+branching, jumping, and forwarding in an "executive" (coordinator-like) fashion
+(which was already the case anyway).
 
 ====
 
@@ -43,7 +43,7 @@ https://en.wikipedia.org/wiki/Pair_programming[pair programming], so please
 form groups of 2-3 students.
 
 [.lead]
-Sections 4.1--4.4 of <<COD>> set the stage for this assignment, and we will
+Sections 4.1--4.4 of <<COD5e>> set the stage for this assignment, and we will
 explore the sections 4.5--4.8 in excruciating detail. We assume that you've at
 least skimmed all of §§ 4.1--4.8, and are prepared to flip back and forth,
 mining for the details. You are also __strongly encouraged__ to have read
