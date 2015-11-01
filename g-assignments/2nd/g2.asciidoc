@@ -1,6 +1,6 @@
 = G2: Pipelined Execution
 Annie <anpi@di.ku.dk>; Oleks <oleks@oleks.info>; ARK15 Course Team; see also Major Contributors
-v1.2, October 6, 2015
+v1.3, November 1, 2015
 :doctype: article
 :backend: html5
 :pdf-page-size: A4
@@ -8,6 +8,32 @@ v1.2, October 6, 2015
 :sectanchors:
 :sectnums:
 :toc:
+
+[NOTE]
+.This assignment is under heavy reconstruction
+====
+
+As a side-effect of trying to follow [[COD5e]] as closely as possible, the
+resulting pipelined simulator is extremely non-modular, fragile and often hard
+to debug and test automatically — as field-testing this assignment has shown.
+
+The resulting C-programming exercise also omits one important lesson — minimize
+global side-effects, even if those side-effects are constrained to a single
+module. Otherwise, the above occurs.
+
+The notion of doing only one thing, and doing one thing well, which is central
+to well-versed C programming, has an adequate doppelgänger in the realm of
+pipelining: factorize a clock-cycle into phases, and in each phase do one
+thing, do one thing quickly. The factorization also permits to skip phases when
+those are unnecessary.
+
+The change will be to implement the pipeline in a more functional, less
+imperative approach, converting phases into side-effect-free (except in terms
+of using time and space) functions, implementing branching, jumping, and
+forwarding in an "executive" (coordinator) fashion (which was already the case
+anyway).
+
+====
 
 This is the second in a series of three G-assignments ("G" for "Godkendelse"
 and/or "Gruppeopgave") which you must pass in order to be eligible for the exam
