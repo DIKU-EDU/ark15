@@ -35,7 +35,7 @@ choice for simulating high-level programming languages, e.g.
 https://github.com/python/cpython[Python] or https://github.com/ruby/ruby[Ruby]
 — a programming language is really a kind of advanced, abstract machine.  The
 topic of simulating programming languages however, is the subject matter for
-another, excellent http://www.webcitation.org/6c4dciEhE[DIKU course].
+http://www.webcitation.org/6c4dciEhE[another DIKU course].
 
 This year's mandatory assignments also have a much more guided form. Our hope
 is that you will both learn from, and have a great time solving the
