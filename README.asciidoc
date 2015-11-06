@@ -32,10 +32,10 @@ using high-level data structures in C.
 
 C is not an unusual choice for simulating machines. C is often the language of
 choice for simulating high-level programming languages, e.g.
-https://github.com/python/cpython[Python] or https://github.com/ruby/ruby[Ruby]
-— a programming language is really a kind of advanced, abstract machine.  The
-topic of simulating programming languages however, is the subject matter for
-http://www.webcitation.org/6c4dciEhE[another DIKU course].
+https://github.com/python/cpython[Python] or
+https://github.com/ruby/ruby[Ruby].  The topic of simulating programming
+languages however, is the subject matter for
+http://www.webcitation.org/6c4dciEhE[another exciting DIKU course].
 
 In the end, it is ill-advised to write hardware simulators or programming
 languages in C. You should deem our use as merely a "hack" — learning C is part
