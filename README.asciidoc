@@ -38,8 +38,8 @@ languages however, is the subject matter for
 http://www.webcitation.org/6c4dciEhE[another exciting DIKU course].
 
 In the end, it is ill-advised to write hardware simulators or programming
-languages in C. You should deem our use as merely a "hack" — learning C is part
-of the learning objectives for this course.
+languages in C. You should deem our use as merely a teaching "hack" — a way to
+teach you both architecture and C at the same time.
 
 This year's mandatory assignments also have a much more guided form. Our hope
 is that you will both learn from, and have a great time solving the
