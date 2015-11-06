@@ -32,11 +32,10 @@ can get. At the same time, we will simulate a range of hardware components
 using high-level data structures in C.
 
 C is not an uncommon choice for simulating machines — it is often the language
-of choice for simulating languages, such as
-https://github.com/python/cpython[Python] and
-https://github.com/ruby/ruby[Ruby].  The topic of simulating languages however,
-is the subject matter for http://www.webcitation.org/6c4dciEhE[another,
-exciting DIKU course].
+of choice for simulating languages, such as https://github.com/ruby/ruby[Ruby]
+and https://github.com/python/cpython[Python].  The topic of simulating
+languages however, is the subject matter for
+http://www.webcitation.org/6c4dciEhE[another, exciting DIKU course].
 
 In the end, it is ill-advised to write hardware simulators or programming
 languages in C. You should deem our use as merely a "teaching hack" — a way to
