@@ -1,4 +1,4 @@
-= Machine Architecture 2015 at DIKU
+= ARK15: Evolved
 
 This is a companion git-repository for the course
 http://www.webcitation.org/6a2I3GpLv[Machine Architecture (ARK)] at
