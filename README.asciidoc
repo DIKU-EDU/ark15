@@ -1,9 +1,10 @@
 = ARK15: Evolved
 
-This is a companion git-repository for the course
+This was a companion git-repository for the course
 http://www.webcitation.org/6a2I3GpLv[Machine Architecture (ARK)] at
-http://www.diku.dk[DIKU]. If you have any comments or corrections, feel
-free to open issues and make pull requests.
+http://www.diku.dk[DIKU]. It is now being used to continue the development of
+the course materials. If you have any comments or corrections, feel free to
+open issues and make pull requests.
 
 == Introduction
 
