@@ -338,7 +338,6 @@ Virtual Appliance (OVA)] which you can _import_ in your VirtualBox.
 
 Use one of the following mirrors to download the appliance:
 
-* http://static.ark15.onlineta.org/CompSysVM-v1.0.ova
 * http://napoleon.hiperfit.dk/~oleks/CompSysVM-v1.0.ova
 * http://harlem.dikurevy.dk/~oleks/CompSysVM-v1.0.ova
 
