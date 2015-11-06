@@ -16,10 +16,11 @@ architecture], the best choice of computer architecture, depends on what
 you use computers for.
 
 It is often also much cheaper, easier, and faster, to simulate computer
-architectures than to build and measure the performance of physical
-components.  The overarching theme for this year's mandatory assignments is
-to introduce you to the practice of writing dynamic software simulators for
-the purposes of later making costly, static hardware choices.
+architectures than to build and measure the performance of physical components.
+(But if you have physical components, use them instead!) The overarching theme
+for this year's mandatory assignments is to introduce you to the practice of
+writing dynamic software simulators for the purposes of later making costly,
+static hardware choices.
 
 Our language of choice may seem a bit unusual: it is C.
 
