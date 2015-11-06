@@ -35,7 +35,7 @@ of choice for simulating high-level programming languages, e.g.
 https://github.com/python/cpython[Python] or
 https://github.com/ruby/ruby[Ruby].  The topic of simulating programming
 languages however, is the subject matter for
-http://www.webcitation.org/6c4dciEhE[another exciting DIKU course].
+http://www.webcitation.org/6c4dciEhE[another, exciting DIKU course].
 
 In the end, it is ill-advised to write hardware simulators or programming
 languages in C. You should deem our use as merely a teaching "hack" — a way to
