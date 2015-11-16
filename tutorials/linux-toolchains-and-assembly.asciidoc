@@ -1443,6 +1443,6 @@ Course Team, and in particular the following members of the team:
 * Oleksandr Shturmov <oleks@oleks.info>
 * Annie Jane Pinder <anpi@di.ku.dk>
 
-A special thanks to Phillip Alexander Roschnowski <roschnowski@gmail.com> for
+A special thanks to Phillip Alexander Roschnowski <glupmjoed@fafnir.dk> for
 the meticulous proof-reading, and Thorkil Kowalski Værge <thorkilk@gmail.com>
 for exercise ideas.
