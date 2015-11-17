@@ -6,6 +6,18 @@ http://www.diku.dk[DIKU]. It is now being used to continue the development of
 the course materials. If you have any comments, suggestions, or corrections,
 feel free to open issues and make pull requests.
 
+== Tutorials
+
+* link:tutorials/linux-toolchains-and-assembly.asciidoc[Linux, Toolchains, and Assembly]
+
+== Assignments
+
+. link:g-assignments/1st/g1.asciidoc[Interpreting Instructions — Simulating Machines]
+
+. link:g-assignments/2nd/g2.asciidoc[Pipelined Execution]
+
+. link:g-assignments/3rd/g3.asciidoc[Caching]
+
 == Introduction
 
 A recurring theme in academia and industry is to question how to squeeze
@@ -47,18 +59,6 @@ is that you will both learn from, and have a great time solving the
 assignments.  Assignments read like (long) blog posts, and gradually build up
 your understanding of both MIPS architecture and C. Of course, some of the
 digging, thinking, coding, and debugging is still left as an exercise for you.
-
-== Tutorials
-
-* link:tutorials/linux-toolchains-and-assembly.asciidoc[Linux, Toolchains, and Assembly]
-
-== Assignments
-
-. link:g-assignments/1st/g1.asciidoc[Interpreting Instructions — Simulating Machines]
-
-. link:g-assignments/2nd/g2.asciidoc[Pipelined Execution]
-
-. link:g-assignments/3rd/g3.asciidoc[Caching]
 
 == Important Student Notice
 
