@@ -20,13 +20,13 @@ feel free to open issues and make pull requests.
 
 == Introduction
 
-A recurring theme in academia and industry is to question how to squeeze
-the last ounce of performance out of your digital computer. As the
-http://booksite.elsevier.com/9780123838728/[quantitative approach to
-computer architecture] has shown, and as best exemplified by the
+A recurring theme in academia and industry is to question how to squeeze the
+last ounce of performance out of your digital computer. As the
+http://booksite.elsevier.com/9780123838728/[quantitative approach to computer
+architecture] has shown, and as best exemplified by the
 https://www.youtube.com/watch?v=3paiCK3dlK0[the success of the MIPS
-architecture], the best choice of computer architecture, depends on what
-you use computers for.
+architecture], the best choice of computer architecture, depends on what you
+use computers for.
 
 It is often also much cheaper, easier, and faster, to simulate computer
 architectures than to build and measure the performance of physical components.
