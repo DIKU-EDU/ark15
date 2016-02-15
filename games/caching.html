@@ -1,0 +1,361 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<meta keywords="Machine Architecture,Maskingarkitektur,ARK,2015,DIKU,Caching,nærlager"/>
+<style type="text/css">
+@media print {
+  #config, #problem, #answer, .help, #compability {
+    display:none;
+  }
+}
+body {
+  font-family: monospace;
+  text-align: center;
+  -webkit-print-color-adjust:exact;
+  font-size:12px;
+}
+input {
+  font-family: monospace;
+}
+section {
+  width:800px;
+  margin:auto;
+}
+#config, .help, #first {
+  margin-top:2em;
+}
+#cache td {
+  height:1em;
+}
+#first, table {
+  width:inherit;
+}
+#first, input {
+  text-align:center;
+  background:#FFFFFF;
+}
+#cache .index {
+  margin:0.5em;
+  display:inline-block;
+  width:20%;
+}
+#cache .blocks {
+  display:inline-block;
+  width:80%;
+}
+#cache .set {
+  padding:0.5em;
+}
+#cache .set:hover {
+  background:#CCE5FF;
+}
+#cache .block {
+  width:80%;
+}
+#cache .block:hover {
+  background:#3399FF;
+  cursor:pointer;
+}
+</style>
+<title>Caching Game</title>
+</head>
+<body>
+<!--
+1. How many bits do you need for the slot?
+2. How many bits are left for the tag?
+3. Sequence of memory accesses in an empty cache.
+4. Sequence of memory access in a warm cache.
+...
+9. Multi-level caching?
+-->
+<section>
+<div class="author">
+  Created @ <a href="http://www.diku.dk/" target="_blank">DIKU</a>.
+  <span id="compatibility">(Works best in Google Chrome.)</span>
+</div>
+<div id="config">
+  <!--
+  <div id="isa">
+  Consider a
+  <select id="bytes_per_word" onchange="manualOverride()">
+    <option value="4">32</option>
+    <option value="8">64</option>
+  </select>-bit instruction-set architecture (ISA).
+  </div>
+  -->
+  <span id="addresses">
+    Cache
+    <select id="bits_per_address" onchange="manualOverride()">
+      <option value="8">8</option>
+      <option value="16">16</option>
+      <option value="32">32</option>
+    </select>-bit,
+    <select id="bits_for_byte" onchange="manualOverride()">
+      <option value="2">byte</option>
+      <option value="0">word</option>
+    </select> addresses,
+  </span>
+  <span id="cache_config">
+    in a
+    <select id="n_blocks_per_set" onchange="manualOverride()">
+      <option value="1">direct-mapped</option>
+      <option value="2">2-way set-associative</option>
+      <option value="4">4-way set-associative</option>
+      <option value="8">8-way set-associative</option>
+      <option value="16">16-way set-associative</option>
+      <option value="Infinity">fully-associative</option>
+    </select>,
+    <select id="cache_bytesize" onchange="manualOverride()">
+      <option value="32">32-byte</option>
+      <option value="64">64-byte</option>
+      <option value="128">128-byte</option>
+      <option value="256">256-byte</option>
+      <option value="512">512-byte</option>
+      <option value="1024">1KB (1024 bytes)</option>
+      <option value="2048">2KB (2 * 1024 bytes)</option>
+    </select> cache.
+  </span>
+  <div name="block_offset_config">
+    <input type="checkbox" id="use_block_offset"
+      onchange="blockOffsetToggle()"/>
+    <label for="use_block_offset">Use block offset.</label>
+  </div>
+  <div id="block_config">
+    Assume a cache line size of
+    <select id="n_words_per_block" onchange="manualOverride()">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="4">4</option>
+    </select>
+    word(s) per block.
+  </div>
+</div>
+<div class="help">
+  Where are the <a href="#"
+    onClick='window.location="view-source:" + window.location.href'
+    >cheat codes?</a>
+</div>
+<div id="first">
+Specify the number of bits for each part of the adress to proceed:
+<table>
+<thead>
+<tr>
+  <th><label for="n_tag_input">Tag</label></th>
+  <th><label for="n_index_input">Index</label></th>
+  <th name="block_offset_config">1<label for="n_block_offset_input">Block Offset</label></th>
+  <th><label for="n_byte_offset_input">Byte Offset</label></th>
+</tr>
+</thead>
+<tbody>
+<tr id="cache_params">
+  <td><input type="text" id="n_tag_input"
+    onchange="checkInput(this, 'n_tag')"
+    tabindex="4" /></td>
+  <td><input type="text" id="n_index_input"
+    onchange="checkInput(this, 'n_index')"
+    tabindex="3" /></td>
+  <td><input type="text" id="n_block_offset_input"
+    onchange="checkInput(this, 'n_block_offset')"
+    tabindex="2" /></td>
+  <td><input type="text" id="n_byte_offset_input"
+    onchange="checkInput(this, 'n_byte_offset')"
+    tabindex="1" /></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="cache">
+</div>
+</section>
+<script type="text/javascript">
+var GOOD_COLOR = "SpringGreen";
+var BAD_COLOR = "OrangeRed";
+var NO_COLOR="#FFFFFF";
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+var n_index = 0, n_tag = 0, n_block_offset = 0, n_byte_offset = 0,
+    cache_bytesize = 0, n_words_per_block = 0, n_blocks_per_set = 0, bits_per_address = 0;
+
+var good = new Set();
+
+function resetInput(id) {
+  var input = $(id);
+
+  input.value = "";
+  input.style.backgroundColor = "white";
+}
+
+function empty(id) {
+  var elem = $(id);
+
+  while (elem.firstChild) {
+    elem.removeChild(elem.firstChild);
+  }
+}
+
+function resetInputs() {
+  resetInput("n_index_input");
+  resetInput("n_tag_input");
+  resetInput("n_block_offset_input");
+  resetInput("n_byte_offset_input");
+  good = new Set();
+  empty("cache");
+}
+
+function blockOffsetToggle() {
+  if ($("use_block_offset").checked) {
+    $("block_config").style.visibility = "visible";
+  } else {
+    $("block_config").style.visibility = "hidden";
+  }
+}
+
+function manualOverride() {
+  resetInputs();
+
+  cache_bytesize = $("cache_bytesize").value;
+  n_words_per_block = $("n_words_per_block").value;
+  n_blocks_per_set = $("n_blocks_per_set").value;
+  bits_per_address = $("bits_per_address").value;
+
+  if (n_blocks_per_set == Infinity) {
+    n_index = 0;
+  } else {
+    n_index = Math.log2(
+      (cache_bytesize / (n_words_per_block * 4)) /
+      n_blocks_per_set);
+  }
+  n_block_offset = Math.log2(n_words_per_block);
+  n_byte_offset = $("bits_for_byte").value;
+  n_tag = bits_per_address - n_index - n_block_offset - n_byte_offset;
+
+  $("n_byte_offset_input").focus();
+}
+
+function pad_trunc(str) {
+
+  var base_length = n_index;
+  var toPad = base_length - str.length;
+
+  if (toPad < 0) {
+    return str.substr(str.length - base_length, base_length);
+  } else {
+    return "0".repeat(toPad) + str;
+  }
+}
+
+function inBase(number, base) {
+  if (base != 10) {
+    number = number >>> 0; // sign-extend
+  }
+
+  var ret = number.toString(base).toUpperCase();
+
+  if (base != 10) {
+    ret = pad_trunc(ret, base);
+  }
+
+  if (base == 16) {
+    ret = "0x" + ret;
+  }
+
+  return ret;
+}
+
+function drawIndex(i, set) {
+  var index = document.createElement('div');
+  index.className = "index";
+  index.innerHTML = i + "<sub>10</sub>(" +
+    pad_trunc(inBase(i, 2)) + "<sub>2</sub>)";
+
+  set.appendChild(index);
+}
+
+function drawTag(block) {
+  var tag = document.createElement('div');
+  tag.className = "tag";
+
+  block.appendChild(tag);
+}
+
+function drawBlock(blocks) {
+  var block = document.createElement('div');
+  block.className = "block";
+
+  block.innerText = "-";
+
+  blocks.appendChild(block);
+}
+
+function drawBlocks(set) {
+  var blocks = document.createElement('div');
+  blocks.className = "blocks";
+
+  var n_blocks_per_set = $("n_blocks_per_set").value;
+
+  if (n_blocks_per_set == Infinity) {
+    n_blocks_per_set = n_tag;
+  }
+
+  for (var j = 0; j < n_blocks_per_set; j++) {
+    drawBlock(blocks);
+  }
+
+  set.appendChild(blocks);
+}
+
+function drawSet(i, cache) {
+  var set = document.createElement('div');
+  set.className = "set";
+
+  drawIndex(i, set);
+  drawBlocks(set);
+
+  cache.appendChild(set);
+}
+
+function drawCache() {
+
+  var n_sets = Math.pow(2, n_index);
+  var cache = $("cache");
+
+  for (var i = 0; i < n_sets; i++) {
+    drawSet(i, cache);
+  }
+}
+
+function checkInput(input, valueName) {
+  var value = eval(valueName);
+
+  var inValue = input.value;
+
+  if (inValue == value) {
+    input.style.backgroundColor = GOOD_COLOR;
+    good.add(valueName);
+  } else if (inValue != "") {
+    input.style.backgroundColor = BAD_COLOR;
+    good.delete(valueName);    
+  } else {
+    input.style.backgroundColor = NO_COLOR;
+    good.delete(valueName);
+  }
+
+  if (good.has("n_index") &&
+      good.has("n_tag") &&
+      good.has("n_block_offset") &&
+      good.has("n_byte_offset")) {
+    drawCache();
+  } else {
+    empty("cache");
+  }
+}
+
+$("use_block_offset").checked = true;
+manualOverride();
+</script>
+</body>
+</html>
